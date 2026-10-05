@@ -1,46 +1,56 @@
 export const certCenters = [
-  // 아라자전거길
   { id: 1, name: '아라서해갑문', lat: 37.558421, lng: 126.607473, route: '아라자전거길' },
   { id: 2, name: '아라한강갑문', lat: 37.598771, lng: 126.800364, route: '아라자전거길' },
-  
-  // 한강종주자전거길(서울)
-  { id: 3, name: '여의도 서울마리나', lat: 37.5348, lng: 126.9329, route: '한강종주자전거길(서울)' },
-  { id: 4, name: '뚝섬 전망콤플렉스', lat: 37.5284, lng: 127.0673, route: '한강종주자전거길(서울)' },
-  { id: 5, name: '광나루 자전거공원', lat: 37.5458, lng: 127.1214, route: '한강종주자전거길(서울)' },
-  
-  // 남한강자전거길
-  { id: 6, name: '능내역(폐역)', lat: 37.5303, lng: 127.2798, route: '남한강자전거길' },
-  { id: 7, name: '양평군립미술관', lat: 37.4912, lng: 127.4879, route: '남한강자전거길' },
-  { id: 8, name: '이포보', lat: 37.3917, lng: 127.5358, route: '남한강자전거길' },
-  { id: 9, name: '여주보', lat: 37.3248, lng: 127.6046, route: '남한강자전거길' },
-  { id: 10, name: '강천보', lat: 37.2718, lng: 127.6695, route: '남한강자전거길' },
-  { id: 11, name: '비내섬', lat: 37.1472, lng: 127.8044, route: '남한강자전거길' },
-  { id: 12, name: '충주댐', lat: 37.0006, lng: 127.9996, route: '남한강자전거길' },
-  
-  // 새재자전거길 (일부)
-  { id: 13, name: '수안보온천', lat: 36.8455, lng: 127.9945, route: '새재자전거길' },
-  { id: 14, name: '이화령휴게소', lat: 36.7645, lng: 128.0125, route: '새재자전거길' },
-  { id: 15, name: '문경불정역', lat: 36.6347, lng: 128.1678, route: '새재자전거길' },
-  
-  // 북한강자전거길 (일부)
-  { id: 16, name: '밝은광장', lat: 37.5482, lng: 127.3197, route: '북한강자전거길' },
-  { id: 17, name: '샛터삼거리', lat: 37.6661, lng: 127.3541, route: '북한강자전거길' },
-  { id: 18, name: '강촌역', lat: 37.8055, lng: 127.6339, route: '북한강자전거길' },
-  { id: 19, name: '신매대교', lat: 37.9175, lng: 127.7121, route: '북한강자전거길' },
-]
+  { id: 3, name: '여의도 인증센터', lat: 37.535085, lng: 126.912987, route: '한강종주자전거길(서울)' },
+  { id: 4, name: '뚝섬전망콤플렉스 인증센터', lat: 37.531174, lng: 127.058676, route: '한강종주자전거길(서울)' },
+  { id: 5, name: '광나루자전거공원인증센터', lat: 37.546171, lng: 127.120342, route: '한강종주자전거길(서울)' },
+  { id: 6, name: '능내역인증센터', lat: 37.522348, lng: 127.294826, route: '남한강자전거길' },
+  { id: 7, name: '앙평군립미술관인증센터', lat: 37.498146, lng: 127.485045, route: '남한강자전거길' },
+  { id: 8, name: '이포보인증센터', lat: 37.397984, lng: 127.547280, route: '남한강자전거길' },
+  { id: 9, name: '여주보인증센터', lat: 37.326387, lng: 127.605016, route: '남한강자전거길' },
+  { id: 10, name: '강천보인증센터', lat: 37.277680, lng: 127.679909, route: '남한강자전거길' },
+  { id: 11, name: '비내섬인증센터', lat: 37.110690, lng: 127.809569, route: '남한강자전거길' },
+  { id: 12, name: '충주댐인증센터', lat: 37.011443, lng: 127.978625, route: '남한강자전거길' },
+  { id: 13, name: '충주탄금대인증센터', lat: 36.989394, lng: 127.903341, route: '남한강자전거길' },
+  { id: 14, name: '밝은광장인증센터', lat: 37.553506, lng: 127.312561, route: '북한강자전거길' },
+  { id: 15, name: '샛터삼거리인증센터', lat: 37.661934, lng: 127.370057, route: '북한강자전거길' },
+  { id: 16, name: '경강교인증센터', lat: 37.820926, lng: 127.519461, route: '북한강자전거길' },
+  { id: 17, name: '신매대교인증센터', lat: 37.920759, lng: 127.712914, route: '북한강자전거길' },
+  { id: 18, name: '수안보온천인증센터', lat: 36.848630, lng: 127.989340, route: '새재자전거길' },
+  { id: 19, name: '이화령휴게소인증센터', lat: 36.751957, lng: 128.031748, route: '새재자전거길' },
+  { id: 20, name: '문경 불정역 자전거길 인증센터', lat: 36.655387, lng: 128.141024, route: '새재자전거길' },
+  { id: 21, name: '상주상풍교인증센터', lat: 36.498776, lng: 128.265741, route: '새재자전거길' },
+  { id: 22, name: '상주보인증센터', lat: 36.430996, lng: 128.250260, route: '낙동강종주자전거길' },
+  { id: 23, name: '낙단보인증센터', lat: 36.359281, lng: 128.307259, route: '낙동강종주자전거길' },
+  { id: 24, name: '구미보 자전거길 인증센터', lat: 36.237306, lng: 128.349474, route: '낙동강종주자전거길' },
+  { id: 25, name: '칠곡보인증센터', lat: 36.015180, lng: 128.400819, route: '낙동강종주자전거길' },
+  { id: 26, name: '안동댐인증센터', lat: 36.577717, lng: 128.758969, route: '낙동강종주자전거길' },
+  { id: 27, name: '강정고령보인증센터', lat: 35.841241, lng: 128.464955, route: '낙동강종주자전거길' },
+  { id: 28, name: '달성보 인증센터', lat: 35.736396, lng: 128.420445, route: '낙동강종주자전거길' },
+  { id: 29, name: '합천창녕보인증센터', lat: 35.590341, lng: 128.361698, route: '낙동강종주자전거길' },
+  { id: 30, name: '창녕함안보인증센터', lat: 35.376965, lng: 128.550111, route: '낙동강종주자전거길' },
+  { id: 31, name: '양산물문화관인증센터', lat: 35.313847, lng: 128.975882, route: '낙동강종주자전거길' },
+  { id: 32, name: '낙동강하굿둑인증센터', lat: 35.108843, lng: 128.948019, route: '낙동강종주자전거길' },
+  { id: 33, name: '금강하굿둑인증센터', lat: 36.019864, lng: 126.765296, route: '금강종주자전거길' },
+  { id: 34, name: '익산성당포구인증센터', lat: 36.130511, lng: 126.922497, route: '금강종주자전거길' },
+  { id: 35, name: '백제보인증센터', lat: 36.317142, lng: 126.940586, route: '금강종주자전거길' },
+  { id: 36, name: '공주보인증센터', lat: 36.460459, lng: 127.100465, route: '금강종주자전거길' },
+  { id: 37, name: '세종보인증센터', lat: 36.476238, lng: 127.259466, route: '금강종주자전거길' },
+  { id: 38, name: '대청댐인증센터', lat: 36.474813, lng: 127.479739, route: '금강종주자전거길' },
+  { id: 39, name: '영산강하구둑인증센터', lat: 34.802185, lng: 126.445778, route: '영산강종주자전거길' },
+  { id: 40, name: '느러지전망관람대', lat: 34.915104, lng: 126.541621, route: '영산강종주자전거길' },
+  { id: 41, name: '죽산보인증센터', lat: 35.019363, lng: 126.637297, route: '영산강종주자전거길' },
+  { id: 42, name: '승촌보인증센터', lat: 35.065774, lng: 126.761223, route: '영산강종주자전거길' },
+  { id: 43, name: '담양대나무숲인증센터', lat: 35.244698, lng: 126.888610, route: '영산강종주자전거길' },
+  { id: 44, name: '메타세쿼이아길인증센터', lat: 35.332010, lng: 127.016903, route: '영산강종주자전거길' },
+  { id: 45, name: '담양댐인증센터', lat: 35.368007, lng: 127.022446, route: '영산강종주자전거길' },
+];
 
-// 스탬프 이미지를 얻는 헬퍼 함수
 export const getStampImageUrl = (center, isAcquired) => {
-  // 실제 도장 이미지가 있다면 `/stamps/${center.id}.png` 형태로 불러올 수 있습니다.
-  // 현재는 데이터가 없으므로 API를 활용해 센터 이름의 첫 글자로 임시 도장 이미지를 생성합니다.
-  
-  const text = encodeURIComponent(center.name.substring(0, 2))
-  
+  const text = encodeURIComponent(center.name.substring(0, 2));
   if (isAcquired) {
-    // 획득 시: 유색 (예: 파란색 배경)
-    return `https://ui-avatars.com/api/?name=${text}&background=0D8ABC&color=fff&rounded=true&size=64&font-size=0.4`
+    return `https://ui-avatars.com/api/?name=${text}&background=0D8ABC&color=fff&rounded=true&size=64&font-size=0.4`;
   } else {
-    // 미획득 시: 회색 배경
-    return `https://ui-avatars.com/api/?name=${text}&background=cccccc&color=666666&rounded=true&size=64&font-size=0.4`
+    return `https://ui-avatars.com/api/?name=${text}&background=cccccc&color=666666&rounded=true&size=64&font-size=0.4`;
   }
-}
+};
