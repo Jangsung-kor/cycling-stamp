@@ -43,12 +43,16 @@
 - [x] **스탬프 보관함 UI**: 획득한 스탬프를 시각적으로 보여주는 화면 구현
 
 ### Phase 4: 배포 및 테스트
-- [ ] **Firebase Hosting 배포**: 앱 빌드(`dist`) 및 Firebase 배포 진행 중. (현재 Firebase 배포 시 파일 인식 오류/캐시 이슈 트러블슈팅 중)
+- [x] **Firebase Hosting 배포**: 앱 빌드(`dist`) 및 Firebase 배포 트러블슈팅 완료 및 정상 배포 확인
 - [ ] **필드 테스트**: 실제 자전거를 타며 GPS 기반 스탬프 기능이 정상 동작하는지 점검
 
 ## 6. 다음 세션을 위한 인수인계 노트 (Handover Notes)
-*   **완료된 작업**: 카카오맵 연동, PWA 설정, GPS 기반 거리 계산 및 스탬프 획득 로직, Pinia 상태 관리, Firebase Auth(구글 로그인), 로컬 데이터 연동 완료.
-*   **현재 문제점**: `npx firebase-tools deploy` 실행 시 `dist` 폴더 내에 여러 파일이 있음에도 불구하고 `found 1 files in dist`라는 메시지와 함께 기본 환영 페이지만 배포되거나 업데이트가 안 되는 현상이 발생함.
+*   **완료된 작업**: 
+    - 카카오맵 연동, PWA 설정, GPS 기반 거리 계산 및 스탬프 획득 로직, Pinia 상태 관리, Firebase Auth(구글 로그인), 로컬 데이터 연동 완료.
+    - Firebase Hosting 배포 트러블슈팅 완료 및 9개 파일 정상 배포 성공 (`https://cycling-stamp.web.app` 확인 가능).
+    - Firestore DB에 스탬프 획득 내역 저장(`addStamp`) 및 불러오기(`fetchUserStamps`) 로직 연동 완료 (`MapView.vue` 비동기 처리 수정).
+    - `.vscode` 등 환경 설정 파일 Git 추적 및 업로드 완료.
+*   **현재 문제점**: 없음 (필드 테스트 대기 중).
 *   **다음 세션 목표**: 
-    1. Firebase Hosting 배포 트러블슈팅 완료 및 정상 배포 확인 (`dist` 폴더 빌드 및 배포 재점검).
-    2. Firestore DB에 스탬프 획득 내역 저장 및 불러오기 로직 연동 완료하기.
+    1. 필드 테스트(실제 자전거 주행)를 통한 GPS 기반 스탬프 기능 검증.
+    2. 추가적인 UI/UX 개선 및 사용자 피드백 반영.

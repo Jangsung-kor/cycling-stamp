@@ -37,7 +37,7 @@ const handleStampAuth = () => {
   showToast({ message: '현재 위치를 확인 중입니다...', duration: 1500 })
 
   navigator.geolocation.getCurrentPosition(
-    (position) => {
+    async (position) => {
       const userLat = position.coords.latitude
       const userLng = position.coords.longitude
       
@@ -58,7 +58,7 @@ const handleStampAuth = () => {
 
       // 반경 50m 이내일 경우 스탬프 획득 처리
       if (nearestCenter && minDistance <= 50) {
-        const success = stampStore.addStamp(nearestCenter)
+        const success = await stampStore.addStamp(nearestCenter)
         if (success) {
           showSuccessToast(`'${nearestCenter.name}' 스탬프를 획득했습니다! 🎉`)
         } else {
