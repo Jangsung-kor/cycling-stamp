@@ -11,9 +11,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from './services/firebase'
+import { useStampStore } from './stores/stamp'
 
 const active = ref(0)
+const stampStore = useStampStore()
+
+onMounted(() => {
+  // 앱이 켜질 때 글로벌하게 로그인 상태를 감지하여 스탬프 데이터를 동기화합니다.
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      stampStore.fetchUserStamps()
+    } else {
+      stampStore.acquiredStamps = [] // 로그아웃 시 스탬프 초기화
+    }
+  })
+})
 </script>
 
 <style>
