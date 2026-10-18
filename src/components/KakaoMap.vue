@@ -2,23 +2,40 @@
   <div class="map-wrapper">
     <div id="map" :class="['kakao-map', `theme-${themeStore.bgThemeKey}`]"></div>
     
-    <!-- 좌측 상단: 보급소(편의점) 퀵 토글 버튼 & 재검색 플로팅 -->
+    <!-- 좌측 상단: 자전거도로 및 보급소(편의점) 퀵 토글 버튼 -->
     <div :class="['supply-control-panel', { 'is-dark': themeStore.bgThemeKey === 'dark' }]">
-      <button 
-        :class="['supply-toggle-btn', { active: isStoreFilterActive }]"
-        @click="toggleStoreFilter"
-        :style="isStoreFilterActive ? {
-          backgroundColor: themeStore.currentTheme.main,
-          borderColor: themeStore.currentTheme.main,
-          color: '#ffffff'
-        } : {}"
-      >
-        <span class="supply-icon">🏪</span>
-        <span class="supply-label">편의점</span>
-        <span v-if="isStoreFilterActive && storeList.length > 0" class="supply-badge">
-          {{ storeList.length }}
-        </span>
-      </button>
+      <div class="toggle-btn-row">
+        <!-- 1. 카카오 공식 자전거 도로망 레이어 토글 버튼 -->
+        <button 
+          :class="['supply-toggle-btn', { active: isBicycleLayerActive }]"
+          @click="toggleBicycleLayer"
+          :style="isBicycleLayerActive ? {
+            backgroundColor: '#059669',
+            borderColor: '#059669',
+            color: '#ffffff'
+          } : {}"
+        >
+          <span class="supply-icon">🚲</span>
+          <span class="supply-label">자전거길</span>
+        </button>
+
+        <!-- 2. 보급소(편의점) 퀵 토글 버튼 -->
+        <button 
+          :class="['supply-toggle-btn', { active: isStoreFilterActive }]"
+          @click="toggleStoreFilter"
+          :style="isStoreFilterActive ? {
+            backgroundColor: themeStore.currentTheme.main,
+            borderColor: themeStore.currentTheme.main,
+            color: '#ffffff'
+          } : {}"
+        >
+          <span class="supply-icon">🏪</span>
+          <span class="supply-label">편의점</span>
+          <span v-if="isStoreFilterActive && storeList.length > 0" class="supply-badge">
+            {{ storeList.length }}
+          </span>
+        </button>
+      </div>
 
       <!-- 지도 이동 시 노출되는 '이 지역 재검색' 버튼 -->
       <button 
@@ -76,6 +93,21 @@ const { stampStore, themeStore, certCenters, getStampSvg: getStampImageUrl, getC
 let mapInstance = null;
 const markerList = [];
 let polylineList = [];
+
+// 카카오 공식 자전거 도로망(BICYCLE) 오버레이 레이어 상태 (기본 활성화)
+const isBicycleLayerActive = ref(true);
+
+const toggleBicycleLayer = () => {
+  if (!mapInstance || !window.kakao || !window.kakao.maps.MapTypeId) return;
+  isBicycleLayerActive.value = !isBicycleLayerActive.value;
+  if (isBicycleLayerActive.value) {
+    mapInstance.addOverlayMapTypeId(window.kakao.maps.MapTypeId.BICYCLE);
+    showToast({ message: '🚲 카카오 공식 자전거 도로망을 켰습니다.', duration: 1500 });
+  } else {
+    mapInstance.removeOverlayMapTypeId(window.kakao.maps.MapTypeId.BICYCLE);
+    showToast({ message: '자전거 도로망을 껐습니다.', duration: 1500 });
+  }
+};
 
 // 보급소(편의점) 검색 및 마커 상태
 const isStoreFilterActive = ref(false);
@@ -139,10 +171,13 @@ const renderPolylines = () => {
     // 양쪽 인증센터를 모두 획득하면 주행 완료 구간으로 실선 강조
     const isCompleted = isFromAcquired && isToAcquired;
 
-    const path = [
-      new window.kakao.maps.LatLng(seg.fromCenter.lat, seg.fromCenter.lng),
-      new window.kakao.maps.LatLng(seg.toCenter.lat, seg.toCenter.lng)
-    ];
+    // 실제 자전거길 도로 굴곡/웨이포인트가 포함된 path 렌더링
+    const path = (seg.path && seg.path.length > 0)
+      ? seg.path.map(pt => new window.kakao.maps.LatLng(pt.lat, pt.lng))
+      : [
+          new window.kakao.maps.LatLng(seg.fromCenter.lat, seg.fromCenter.lng),
+          new window.kakao.maps.LatLng(seg.toCenter.lat, seg.toCenter.lng)
+        ];
 
     const polyline = new window.kakao.maps.Polyline({
       map: mapInstance,
@@ -211,6 +246,11 @@ const initMap = () => {
   const map = new window.kakao.maps.Map(container, options)
   mapInstance = map;
   window.kakaoMap = map;
+
+  // 0. 카카오 공식 자전거 도로망(BICYCLE) 레이어 기본 활성화
+  if (isBicycleLayerActive.value && window.kakao.maps.MapTypeId?.BICYCLE) {
+    map.addOverlayMapTypeId(window.kakao.maps.MapTypeId.BICYCLE);
+  }
   
   // 1. 자전거길 코스 경로선(Polyline) 렌더링 (마커 아래 레이어)
   renderPolylines();
@@ -532,6 +572,12 @@ const toggleStoreFilter = () => {
   flex-direction: column;
   gap: 8px;
   align-items: flex-start;
+}
+
+.toggle-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .supply-toggle-btn {

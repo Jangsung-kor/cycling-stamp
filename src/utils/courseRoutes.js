@@ -1,7 +1,8 @@
 import { certCenters } from './certCenters'
+import courseTracks from '../data/courseTracks.json'
 
 /**
- * 전국 국토종주 주요 코스별 인증센터 연결 순서 정의
+ * 전국 국토종주 13개 전체 코스별 인증센터 연결 순서 정의
  */
 export const courseDefinitions = [
   {
@@ -48,65 +49,317 @@ export const courseDefinitions = [
     name: '영산강종주자전거길',
     // 담양댐 ~ 메타세쿼이아 ~ 담양대나무숲 ~ 승촌보 ~ 죽산보 ~ 느러지 ~ 영산강하구둑
     order: [45, 44, 43, 42, 41, 40, 39]
+  },
+  {
+    name: '섬진강자전거길',
+    // 섬진강댐 ~ 장군목 ~ 향가유원지 ~ 횡탄정 ~ 사성암 ~ 남도대교 ~ 매화마을 ~ 배알도수변공원
+    order: [47, 48, 46, 49, 50, 51, 52, 53]
+  },
+  {
+    name: '오천자전거길',
+    // 합강공원 ~ 무심천교 ~ 백로공원 ~ 괴강교 ~ 행촌교차로
+    order: [54, 55, 56, 57, 58]
+  },
+  {
+    name: '동해안자전거길(강원)',
+    // 통일전망대 ~ 북천철교 ~ 봉포해변 ~ 영금정 ~ 동호해변 ~ 지경공원 ~ 경포해변 ~ 정동진 ~ 망상해변 ~ 추암촛대바위 ~ 한재공원 ~ 임원
+    order: [59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70]
+  },
+  {
+    name: '동해안자전거길(경북)',
+    // 울진은어다리 ~ 망양휴게소 ~ 월송정 ~ 고래불해변 ~ 해맞이공원
+    order: [71, 72, 73, 74, 75]
+  },
+  {
+    name: '제주환상자전거길',
+    // 용두암 ~ 다락쉼터 ~ 해거름마을공원 ~ 송악산 ~ 법환바당 ~ 쇠소깍 ~ 표선해변 ~ 성산일출봉 ~ 김녕성세기해변 ~ 함덕서우봉해변 ~ 용두암 (순환)
+    order: [78, 77, 76, 85, 84, 83, 82, 81, 80, 79, 78]
   }
 ]
 
 /**
- * 코스와 코스를 잇는 국토종주 연결 구간 (환승/진입로)
+ * 코스와 코스를 잇는 국토종주 주요 연결 구간 (환승 및 분기점)
  */
 export const connectorSegments = [
-  { from: 2, to: 3, name: '아라한강갑문 ↔ 여의도 (한강 진입)' },
-  { from: 5, to: 6, name: '광나루 ↔ 능내역 (남한강 진입)' },
+  { from: 2, to: 3, name: '아라한강갑문 ↔ 여의도 (한강 진입로)' },
+  { from: 5, to: 6, name: '광나루 ↔ 능내역 (남한강 진입로)' },
   { from: 6, to: 14, name: '능내역 ↔ 밝은광장 (두물머리 분기점)' },
   { from: 13, to: 18, name: '충주탄금대 ↔ 수안보온천 (새재자전거길 진입)' },
-  { from: 21, to: 22, name: '상주상풍교 ↔ 상주보 (낙동강종주 본류 진입)' }
+  { from: 21, to: 22, name: '상주상풍교 ↔ 상주보 (낙동강 본류 합류점)' },
+  { from: 37, to: 54, name: '세종보 ↔ 합강공원 (금강 ↔ 오천자전거길 분기점)' },
+  { from: 58, to: 19, name: '행촌교차로 ↔ 이화령휴게소 (오천 ↔ 새재자전거길 환승)' },
+  { from: 70, to: 71, name: '임원 ↔ 울진은어다리 (동해안 강원 ↔ 경북 연결)' },
+  { from: 44, to: 46, name: '담양 메타세쿼이아 ↔ 순창 향가유원지 (영산강 ↔ 섬진강 연결)' }
 ]
 
 /**
+ * 주요 지형(강변 곡선, 해안선, 도로 굴곡)을 반영한 실제 곡선 궤적 웨이포인트 매핑
+ * - 인증센터 간 직선이 아닌 실제 자전거길 도로 굴곡을 구현
+ */
+export const segmentWaypoints = {
+  // 1. 아라자전거길 (경인아라뱃길 수로 곡선)
+  '1-2': [
+    { lat: 37.5684, lng: 126.6710 }, // 시천교(검암)
+    { lat: 37.5815, lng: 126.7450 }, // 귤현보도교(계양)
+    { lat: 37.5980, lng: 126.7820 }  // 김포터미널 입구
+  ],
+
+  // 2. 한강종주자전거길 및 연결선
+  '2-3': [
+    { lat: 37.5615, lng: 126.8620 }, // 가양대교 남단
+    { lat: 37.5450, lng: 126.8870 }  // 안양천 합수부
+  ],
+  '3-4': [
+    { lat: 37.5115, lng: 126.9950 }, // 반포한강공원/세빛섬
+    { lat: 37.5250, lng: 127.0190 }, // 한남대교 남단
+    { lat: 37.5340, lng: 127.0420 }  // 성수대교 북단
+  ],
+  '4-5': [
+    { lat: 37.5320, lng: 127.0980 }, // 잠실철교 북단
+    { lat: 37.5435, lng: 127.1140 }  // 광진교 자전거길
+  ],
+  '5-6': [
+    { lat: 37.5560, lng: 127.1950 }, // 미사리 한강변
+    { lat: 37.5410, lng: 127.2480 }, // 팔당대교 남단
+    { lat: 37.5270, lng: 127.2750 }  // 팔당댐 인근
+  ],
+
+  // 3. 남한강자전거길 (남한강 물줄기 궤적)
+  '6-7': [
+    { lat: 37.5380, lng: 127.3220 }, // 양수리/두물머리 철교
+    { lat: 37.5180, lng: 127.4050 }  // 국수역 자전거 쉼터
+  ],
+  '7-8': [
+    { lat: 37.4520, lng: 127.5350 }  // 개군면 남한강변
+  ],
+  '8-9': [
+    { lat: 37.3550, lng: 127.5750 }  // 대신면 강변 쉼터
+  ],
+  '9-10': [
+    { lat: 37.3020, lng: 127.6550 }  // 신륵사 앞 남한강교
+  ],
+  '10-11': [
+    { lat: 37.1950, lng: 127.7550 }  // 부론면 섬강 합수부
+  ],
+  '11-13': [
+    { lat: 37.0420, lng: 127.8720 }  // 가흥교 남한강 굴곡
+  ],
+  '6-14': [
+    { lat: 37.5320, lng: 127.3180 }  // 북한강철교 진입부
+  ],
+
+  // 4. 북한강자전거길 (북한강 및 의암호 물길)
+  '14-15': [
+    { lat: 37.6050, lng: 127.3320 }, // 조안면 북한강변
+    { lat: 37.6320, lng: 127.3480 }  // 화도읍 강변 데크
+  ],
+  '15-16': [
+    { lat: 37.6830, lng: 127.3820 }, // 대성리역 강변
+    { lat: 37.7340, lng: 127.4230 }, // 청평역 자전거길
+    { lat: 37.8180, lng: 127.5100 }  // 가평교 앞
+  ],
+  '16-17': [
+    { lat: 37.8120, lng: 127.6080 }, // 백양리/강촌 출렁다리
+    { lat: 37.8520, lng: 127.6750 }  // 의암댐 스카이워크
+  ],
+
+  // 5. 새재자전거길 (백두대간 이화령 고갯길 도로 굴곡)
+  '18-19': [
+    { lat: 36.8050, lng: 128.0120 }  // 소조령/연풍 진입로
+  ],
+  '19-20': [
+    { lat: 36.7020, lng: 128.0850 }  // 문경새재 입구/조령천
+  ],
+
+  // 6. 낙동강종주자전거길 (안동댐 ~ 부산 하굿둑)
+  '26-21': [
+    { lat: 36.5620, lng: 128.5350 }, // 예천 지보/회룡포 인근
+    { lat: 36.5280, lng: 128.3820 }  // 풍양면 강변
+  ],
+  '27-28': [
+    { lat: 36.2750, lng: 128.3950 }  // 옥포/구지면 강변길
+  ],
+  '28-29': [
+    { lat: 35.6650, lng: 128.3920 }  // 고령 우곡교
+  ],
+  '29-30': [
+    { lat: 35.4850, lng: 128.4550 }  // 남지철교/개비리길
+  ],
+  '30-31': [
+    { lat: 35.3420, lng: 128.8150 }  // 밀양 삼랑진교/원동역
+  ],
+  '31-32': [
+    { lat: 35.2150, lng: 128.9850 }  // 화명생태공원/삼락생태공원
+  ],
+
+  // 7. 금강종주자전거길 (대청댐 ~ 군산 하굿둑)
+  '38-37': [
+    { lat: 36.5050, lng: 127.3950 }  // 부강면 금강변
+  ],
+  '37-36': [
+    { lat: 36.4680, lng: 127.1820 }  // 금흥동 강변길
+  ],
+  '36-35': [
+    { lat: 36.3850, lng: 127.0250 }  // 이인면/탄천면 강변
+  ],
+  '35-34': [
+    { lat: 36.2250, lng: 126.9150 }  // 논산 강경포구
+  ],
+
+  // 8. 영산강자전거길 (담양 ~ 목포)
+  '45-44': [
+    { lat: 35.3450, lng: 127.0190 }  // 담양호 아래 관방제림
+  ],
+  '43-42': [
+    { lat: 35.1520, lng: 126.8350 }  // 광주천 합수부
+  ],
+  '41-40': [
+    { lat: 34.9650, lng: 126.5850 }  // 몽탄면 영산강 굽이
+  ],
+
+  // 9. 섬진강자전거길 (임실 ~ 광양만)
+  '47-48': [
+    { lat: 35.4950, lng: 127.1720 }  // 구담마을/섬진강 물길
+  ],
+  '48-46': [
+    { lat: 35.3950, lng: 127.1950 }  // 순창 적성면 강변 데크
+  ],
+  '50-51': [
+    { lat: 35.1950, lng: 127.5020 }  // 화개장터 인근 섬진강변
+  ],
+  '52-53': [
+    { lat: 35.0120, lng: 127.7380 }  // 광양 망덕포구 진입로
+  ],
+
+  // 10. 동해안자전거길(강원) 해안 도로 굴곡
+  '59-60': [
+    { lat: 38.4550, lng: 128.4450 }  // 거진항 해안도로
+  ],
+  '62-63': [
+    { lat: 38.1350, lng: 128.6350 }  // 대포항 / 낙산해변
+  ],
+  '64-65': [
+    { lat: 37.8650, lng: 128.8450 }  // 주문진항 해안길
+  ],
+  '65-66': [
+    { lat: 37.7450, lng: 128.9850 }  // 안목커피거리 / 강릉솔향
+  ],
+  '68-69': [
+    { lat: 37.4420, lng: 129.1780 }  // 삼척항 / 새천년도로
+  ],
+
+  // 11. 동해안자전거길(경북) 해안선
+  '71-72': [
+    { lat: 36.9250, lng: 129.4120 }  // 울진 덕신리 해안도로
+  ],
+  '73-74': [
+    { lat: 36.6750, lng: 129.4350 }  // 후포항 / 백석해변
+  ],
+  '74-75': [
+    { lat: 36.5150, lng: 129.4250 }  // 축산항 / 블루로드
+  ],
+
+  // 12. 제주환상자전거길 (제주 해안선 둘레길 궤적)
+  '78-77': [
+    { lat: 33.4980, lng: 126.4250 }  // 이호테우 / 하귀 해안도로
+  ],
+  '77-76': [
+    { lat: 33.4150, lng: 126.2650 }  // 곽지 / 협재해수욕장
+  ],
+  '76-85': [
+    { lat: 33.3050, lng: 126.1750 }, // 수월봉 / 차귀도 해안길
+    { lat: 33.2450, lng: 126.2120 }  // 모슬포항 / 하모해변
+  ],
+  '85-84': [
+    { lat: 33.2380, lng: 126.3750 }, // 산방산 앞 해안길
+    { lat: 33.2420, lng: 126.4350 }  // 중문관광단지 주상절리대
+  ],
+  '84-83': [
+    { lat: 33.2450, lng: 126.5650 }  // 정방폭포 / 보목포구
+  ],
+  '83-82': [
+    { lat: 33.2850, lng: 126.7450 }  // 남원포구 / 신흥리 해안
+  ],
+  '82-81': [
+    { lat: 33.3950, lng: 126.8850 }  // 신산포구 / 섭지코지 진입
+  ],
+  '81-80': [
+    { lat: 33.5250, lng: 126.9050 }, // 종달리 해안도로
+    { lat: 33.5550, lng: 126.8520 }  // 세화해변 / 평대리
+  ],
+  '80-79': [
+    { lat: 33.5520, lng: 126.7150 }  // 김녕 환상해안길
+  ],
+  '79-78': [
+    { lat: 33.5350, lng: 126.5850 }  // 삼양해수욕장 / 사라봉
+  ]
+}
+
+/**
  * 모든 세그먼트(인접 두 인증센터 쌍)를 플랫 리스트로 생성
+ * - 각 세그먼트마다 실제 도로 곡선 궤적(path)을 완벽히 포함하여 반환
  */
 export const getAllCourseSegments = () => {
   const segments = []
   const centerMap = new Map(certCenters.map(c => [c.id, c]))
 
-  // 1. 코스 내부 구간
+  const buildSegment = (fromId, toId, courseName, isConnector = false) => {
+    const fromCenter = centerMap.get(fromId)
+    const toCenter = centerMap.get(toId)
+
+    if (!fromCenter || !toCenter) return null
+
+    // 1. 실측 정밀 GPS 트랙(courseTracks.json) 조회
+    const keyForward = `${fromId}-${toId}`
+    const keyBackward = `${toId}-${fromId}`
+    let path = []
+    let waypoints = []
+
+    if (courseTracks && courseTracks[keyForward] && courseTracks[keyForward].length > 0) {
+      path = courseTracks[keyForward].map(pt => ({ lat: pt[0], lng: pt[1] }))
+    } else if (courseTracks && courseTracks[keyBackward] && courseTracks[keyBackward].length > 0) {
+      path = [...courseTracks[keyBackward]].reverse().map(pt => ({ lat: pt[0], lng: pt[1] }))
+    } else {
+      // 2. 트랙이 없을 경우 기존 웨이포인트(또는 양 끝점) 폴백
+      if (segmentWaypoints[keyForward]) {
+        waypoints = segmentWaypoints[keyForward]
+      } else if (segmentWaypoints[keyBackward]) {
+        waypoints = [...segmentWaypoints[keyBackward]].reverse()
+      }
+      path = [
+        { lat: fromCenter.lat, lng: fromCenter.lng },
+        ...waypoints,
+        { lat: toCenter.lat, lng: toCenter.lng }
+      ]
+    }
+
+    return {
+      id: `${isConnector ? 'connector' : 'course'}-${fromId}-${toId}`,
+      courseName,
+      fromId,
+      toId,
+      fromCenter,
+      toCenter,
+      waypoints,
+      path,
+      isConnector
+    }
+  }
+
+  // 1. 전국 13개 코스 내부 구간 생성
   courseDefinitions.forEach(course => {
     for (let i = 0; i < course.order.length - 1; i++) {
       const fromId = course.order[i]
       const toId = course.order[i + 1]
-      const fromCenter = centerMap.get(fromId)
-      const toCenter = centerMap.get(toId)
-
-      if (fromCenter && toCenter) {
-        segments.push({
-          id: `course-${fromId}-${toId}`,
-          courseName: course.name,
-          fromId,
-          toId,
-          fromCenter,
-          toCenter,
-          isConnector: false
-        })
-      }
+      const seg = buildSegment(fromId, toId, course.name, false)
+      if (seg) segments.push(seg)
     }
   })
 
-  // 2. 코스 간 연결 간선
+  // 2. 코스 간 환승/연결 구간 생성
   connectorSegments.forEach(conn => {
-    const fromCenter = centerMap.get(conn.from)
-    const toCenter = centerMap.get(conn.to)
-
-    if (fromCenter && toCenter) {
-      segments.push({
-        id: `connector-${conn.from}-${conn.to}`,
-        courseName: conn.name,
-        fromId: conn.from,
-        toId: conn.to,
-        fromCenter,
-        toCenter,
-        isConnector: true
-      })
-    }
+    const seg = buildSegment(conn.from, conn.to, conn.name, true)
+    if (seg) segments.push(seg)
   })
 
   return segments
