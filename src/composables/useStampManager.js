@@ -49,7 +49,55 @@ export function useStampManager() {
     return '새로운 자전거 여행을 시작해보세요! 🗺️'
   })
 
-  // 3. 코스별 필터링
+  // 3. 코스별 정의 및 달성 현황 통계
+  const COURSE_DEFINITIONS = [
+    { tab: '아라자전거길', fullName: '아라자전거길', routeQuery: '아라자전거길' },
+    { tab: '한강(서울)', fullName: '한강종주자전거길(서울)', routeQuery: '한강종주자전거길(서울)' },
+    { tab: '남한강자전거길', fullName: '남한강자전거길', routeQuery: '남한강자전거길' },
+    { tab: '북한강자전거길', fullName: '북한강자전거길', routeQuery: '북한강자전거길' },
+    { tab: '새재자전거길', fullName: '새재자전거길', routeQuery: '새재자전거길' },
+    { tab: '낙동강종주자전거길', fullName: '낙동강종주자전거길', routeQuery: '낙동강종주자전거길' },
+    { tab: '금강종주자전거길', fullName: '금강종주자전거길', routeQuery: '금강종주자전거길' },
+    { tab: '영산강종주자전거길', fullName: '영산강종주자전거길', routeQuery: '영산강종주자전거길' },
+    { tab: '섬진강자전거길', fullName: '섬진강자전거길', routeQuery: '섬진강자전거길' },
+    { tab: '오천자전거길', fullName: '오천자전거길', routeQuery: '오천자전거길' },
+    { tab: '동해안자전거길(강원)', fullName: '동해안자전거길(강원)', routeQuery: '동해안자전거길(강원)' },
+    { tab: '동해안자전거길(경북)', fullName: '동해안자전거길(경북)', routeQuery: '동해안자전거길(경북)' },
+    { tab: '제주환상자전거길', fullName: '제주환상자전거길', routeQuery: '제주환상자전거길' }
+  ]
+
+  const courseProgressList = computed(() => {
+    return COURSE_DEFINITIONS.map(c => {
+      const centers = enrichedCenters.value.filter(item => item.route.includes(c.routeQuery))
+      const total = centers.length
+      const acquired = centers.filter(item => item.isAcquired).length
+      const rate = total > 0 ? Math.round((acquired / total) * 100) : 0
+      const isCompleted = total > 0 && acquired === total
+      const remainingCenters = centers.filter(item => !item.isAcquired)
+
+      return {
+        tab: c.tab,
+        fullName: c.fullName,
+        total,
+        acquired,
+        rate,
+        isCompleted,
+        remainingCenters
+      }
+    })
+  })
+
+  // 완주한 총 코스 수 (13개 중 N개)
+  const completedCourseCount = computed(() => {
+    return courseProgressList.value.filter(c => c.isCompleted).length
+  })
+
+  // 특정 탭 이름에 대한 코스 진행 정보 조회
+  const getCourseProgress = (tabName) => {
+    return courseProgressList.value.find(c => c.tab === tabName) || null
+  }
+
+  // 4. 코스별 필터링
   const filterCentersByRoute = (routeTab) => {
     if (!routeTab || routeTab === '전체') {
       return enrichedCenters.value
@@ -151,6 +199,9 @@ export function useStampManager() {
     totalVisitCount,
     progressRate,
     cheerMessage,
+    courseProgressList,
+    completedCourseCount,
+    getCourseProgress,
 
     // 메서드 및 원본 데이터
     certCenters,
