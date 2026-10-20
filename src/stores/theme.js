@@ -114,12 +114,14 @@ export const COLOR_THEMES = {
 
 export const useThemeStore = defineStore('theme', {
   state: () => {
+    const isBrowser = typeof localStorage !== 'undefined'
+
     // 배경 테마 로컬스토리지 복원
-    const savedBg = localStorage.getItem('cycling_map_theme')
+    const savedBg = isBrowser ? localStorage.getItem('cycling_map_theme') : null
     const initialBg = (savedBg && BG_THEMES[savedBg]) ? savedBg : 'mono'
 
     // 도장 테마 로컬스토리지 복원
-    const savedStamp = localStorage.getItem('cycling_stamp_theme')
+    const savedStamp = isBrowser ? localStorage.getItem('cycling_stamp_theme') : null
     const initialStamp = (savedStamp && COLOR_THEMES[savedStamp]) ? savedStamp : 'mint'
 
     return {
@@ -141,13 +143,17 @@ export const useThemeStore = defineStore('theme', {
     setBgTheme(key) {
       if (BG_THEMES[key]) {
         this.bgThemeKey = key
-        localStorage.setItem('cycling_map_theme', key)
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('cycling_map_theme', key)
+        }
       }
     },
     setStampTheme(key) {
       if (COLOR_THEMES[key]) {
         this.stampThemeKey = key
-        localStorage.setItem('cycling_stamp_theme', key)
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('cycling_stamp_theme', key)
+        }
       }
     },
     // 기존 호환용 alias

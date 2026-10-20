@@ -33,3 +33,9 @@ src/firebase.json
 .gemini/
 src/.agents/
 src/skills-lock.json
+
+# Local untracked session notes
+_no_commit_sessions/
+
+# Standalone portfolio repository
+portfolio/

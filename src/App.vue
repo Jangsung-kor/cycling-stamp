@@ -41,18 +41,25 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './services/firebase'
 import { useStampStore } from './stores/stamp'
 import { useThemeStore } from './stores/theme'
+import { useGpxStore } from './stores/gpx'
 
 const active = ref(0)
 const stampStore = useStampStore()
 const themeStore = useThemeStore()
+const gpxStore = useGpxStore()
 
 onMounted(() => {
-  // 앱이 켜질 때 글로벌하게 로그인 상태를 감지하여 스탬프 데이터를 동기화합니다.
+  // 앱 실행 시 로컬 IndexedDB에 보관된 GPX 트랙 1차 로드
+  gpxStore.loadTracks()
+
+  // 앱이 켜질 때 글로벌하게 로그인 상태를 감지하여 스탬프 및 GPX 데이터를 동기화합니다.
   onAuthStateChanged(auth, (user) => {
     if (user) {
       stampStore.fetchUserStamps()
+      gpxStore.loadTracks() // 로그인 시 클라우드 동기화 수행
     } else {
       stampStore.acquiredStamps = [] // 로그아웃 시 스탬프 초기화
+      gpxStore.loadTracks() // 로그아웃 시 로컬 트랙 로드
     }
   })
 })
