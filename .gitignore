@@ -39,3 +39,7 @@ _no_commit_sessions/
 
 # Standalone portfolio repository
 portfolio/
+
+session_id.txt
+memo.txt
+*.memo.txt
