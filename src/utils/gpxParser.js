@@ -185,6 +185,9 @@ export function parseGpx(gpxXmlString, fallbackTitle = '라이딩 기록', toler
     let maxLat = points[0].lat
     let minLng = points[0].lng
     let maxLng = points[0].lng
+    let minEle = null
+    let maxEle = null
+    const rawElevationPoints = []
 
     for (let i = 0; i < points.length; i++) {
       const p = points[i]
@@ -194,6 +197,12 @@ export function parseGpx(gpxXmlString, fallbackTitle = '라이딩 기록', toler
       if (p.lat > maxLat) maxLat = p.lat
       if (p.lng < minLng) minLng = p.lng
       if (p.lng > maxLng) maxLng = p.lng
+
+      // 고도 최소/최대 갱신
+      if (p.ele !== null && !isNaN(p.ele)) {
+        if (minEle === null || p.ele < minEle) minEle = p.ele
+        if (maxEle === null || p.ele > maxEle) maxEle = p.ele
+      }
 
       // 거리 및 획득고도 누적
       if (i > 0) {
@@ -207,6 +216,16 @@ export function parseGpx(gpxXmlString, fallbackTitle = '라이딩 기록', toler
         if (p.ele !== null && prev.ele !== null && p.ele > prev.ele) {
           elevationGainMeters += (p.ele - prev.ele)
         }
+      }
+
+      // 거리 대비 고도 포인트 수집
+      if (p.ele !== null && !isNaN(p.ele)) {
+        rawElevationPoints.push({
+          distKm: Math.round((totalDistanceMeters / 1000) * 100) / 100,
+          ele: Math.round(p.ele),
+          lat: Math.round(p.lat * 1000000) / 1000000,
+          lng: Math.round(p.lng * 1000000) / 1000000
+        })
       }
     }
 
@@ -236,11 +255,26 @@ export function parseGpx(gpxXmlString, fallbackTitle = '라이딩 기록', toler
     const simplifiedCount = coordinates.length
     const compressionRate = ((1 - simplifiedCount / originalCount) * 100).toFixed(1)
 
+    // 고도 프로필 경량화 (최대 120개 포인트 균등 샘플링)
+    let elevationProfile = []
+    if (rawElevationPoints.length <= 120) {
+      elevationProfile = rawElevationPoints
+    } else {
+      const step = (rawElevationPoints.length - 1) / 119
+      for (let i = 0; i < 120; i++) {
+        const idx = Math.min(rawElevationPoints.length - 1, Math.round(i * step))
+        elevationProfile.push(rawElevationPoints[idx])
+      }
+    }
+
     return {
       success: true,
       title: trackName || fallbackTitle,
       distanceKm: Math.round((totalDistanceMeters / 1000) * 10) / 10,
       elevationGainM: Math.round(elevationGainMeters),
+      minElevationM: minEle !== null ? Math.round(minEle) : null,
+      maxElevationM: maxEle !== null ? Math.round(maxEle) : null,
+      elevationProfile,
       durationMinutes,
       startTime: startTimeStr || new Date().toISOString(),
       bounds: {

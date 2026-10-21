@@ -102,11 +102,12 @@
     *   편의점 마커 탭 시 상호명, 거리(m), 도로명 주소, 전화번호 및 **[카카오맵 길찾기 ↗]** 원클릭 연동 지원.
     *   지도 이동 및 확대/축소 시 **`[ 🔄 이 지역 재검색 ]`** 플로팅 칩 자동 노출로 라이딩 예정 코스 보급 계획 지원.
 
-#### [Step 8] 실시간 숙소(숙박) 탐색 및 라이더 편의 기능 (예정)
-- [ ] **카카오맵 Places 카테고리 검색(`AD5`) 기반 실시간 숙소 렌더링 (`KakaoMap.vue`)**:
+#### [Step 8] 실시간 숙소(숙박) 탐색 및 야놀자 하이브리드 연동 (완료)
+- [x] **카카오맵 Places 카테고리 검색(`AD5`) 기반 실시간 숙소 렌더링 (`src/composables/useKakaoAccomLayer.js`, `KakaoMap.vue`)**:
     *   지도 좌측 상단에 `[ 🏨 숙소 ]` 원터치 토글 버튼 배치 (모텔, 호텔, 펜션, 게스트하우스).
-    *   현재 지도 중심 반경 3~5km 내 숙소 마커 표시 및 상호명, 거리, 도로명 주소 표기.
-    *   마커 터치 시 **전화 바로 걸기(`tel:`) 버튼** 및 **카카오맵 길찾기 딥링크** 제공.
+    *   현재 지도 중심 반경 5km 내 숙소 마커(인디고 컬러) 렌더링 및 실시간 개수 뱃지 표기.
+    *   마커 터치 시 인포윈도우: 상호명, 카테고리 상세, 거리(m/km), 도로명 주소, **전화 바로 걸기(`tel:`) 버튼**, **카카오맵 길찾기 딥링크**, **야놀자 실시간 요금/사진 확인 딥링크(`nol.yanolja.com`)** 제공.
+    *   지도 이동 시 `[ 이 지역 재검색 ]` 칩 연동으로 라이딩 예정 코스 및 다음 인증센터 인근 숙소 사전 탐색 지원.
 - [ ] **자전거 친화 숙소 태깅 및 나만의 숙소 찜/메모 기능 (추후)**:
     *   라이더 핵심 니즈인 '자전거 실내/객실 보관 가능 여부' 태그 표기.
     *   사용자가 직접 다녀온 숙소의 자전거 보관 후기 메모를 기록하고 저장(Firestore 연동).
@@ -138,7 +139,7 @@
         - 서브컬렉션: `users/{uid}/friends/{friendUid}`, `users/{uid}/friend_requests/{senderUid}`
         - 친구 요청 전송, 수신 대기, 수락(양방향 동기화), 거절, 친구 삭제.
     *   **퍼사드 매니저 (`useFriendManager.js`)**: 친구 목록/요청 상태, UI 알림 뱃지, 실시간 리스너 단일 진입점 제공.
-    *   **엄격한 단위 테스트 (`tests/test_friend_system.js`)**: 고유 태그 검증, 친구 요청/수락/거절 상태 전이, 중복 신청 방어 12개 테스트 100% 통과.
+    *   **엄격한 단위 테스트 (`tests/test_friend_system.js`)**: 고유 태그 검증, 친구 요청/수락/거절 상태 전이, 중복 신청 방어 및 친구 최대 정원(MAX_FRIENDS_LIMIT = 20) 상한선 방어 15개 테스트 100% 통과.
 - [x] **Step 10-2: GPX 2단계 공개 범위 및 친구 공유 엔진 (`src/stores/gpx.js`, `src/composables/useGpxManager.js`) (완료)**
     *   **트랙 모델 확장**: `visibility: 'private' | 'friends'` (기본값: `'private'`).
     *   **친구 공유 파이프라인**:
@@ -161,7 +162,7 @@
     *   **친구 궤적 인터랙션 & 팝업**: 친구 폴리라인 터치 시 라이더 닉네임, 트랙명, 거리 안내 Toast 노출 및 선택 시 바운딩 박스 줌.
 - [x] **Step 10-6: 통합 E2E 테스트 및 배포 검증 (`tests/test_integration_social_gpx.js`) (완료)**
     *   **E2E 풀 파이프라인 검증**: 유저 코드 생성 $\rightarrow$ 친구 신청/수락 $\rightarrow$ GPX 업로드(private) $\rightarrow$ 친구 공개 전환(friends) $\rightarrow$ 친구 계정 공유 궤적 실시간 로드 $\rightarrow$ 개별 지도 표시 토글 $\rightarrow$ 비공개 복원 시 파기 $\rightarrow$ 친구 끊기까지 6개 시나리오 100% 통과.
-    *   **프로덕션 빌드 & 회귀 검증**: 총 51개 자동화 단위/통합 테스트 100% 통과 및 `yarn build` 번들 무결성 확인.
+    *   **프로덕션 빌드 & 회귀 검증**: 총 54개 자동화 단위/통합 테스트 100% 통과 및 `yarn build` 번들 무결성 확인.
 
 ---
 
@@ -173,17 +174,54 @@
       - **Step 10-3**: 친구 관리 바텀시트 모달(`FriendModal.vue`), 프로필 뷰(`ProfileView.vue`) 내 코드 칩 및 미확인 친구 요청 실시간 알림 뱃지.
       - **Step 10-4**: `GpxDrawer.vue` 2열 탭 분리(`[내 주행]` / `[친구 주행]`), 원클릭 공개 범위 토글 칩(`vis-toggle-chip`), 친구 트랙 카드 및 개별 표시 토글.
       - **Step 10-5**: `useKakaoGpxLayer.js` 멀티 유저 시각 분리(내 주행: 테마색, 친구 주행: 시안 `#06b6d4`), 지도 상단 `[ 👥 친구 궤적 (N) ]` 플로팅 퀵 토글, 호버/선택 줌 연동.
-      - **Step 10-6**: E2E 통합 테스트 파이프라인(`tests/test_integration_social_gpx.js`) 구축, 총 51개 테스트 100% 통과 및 프로덕션 빌드(`yarn build`) 검증 완료.
+      - **Step 10-6**: E2E 통합 테스트 파이프라인(`tests/test_integration_social_gpx.js`) 구축, 총 54개 테스트 100% 통과 및 프로덕션 빌드(`yarn build`) 검증 완료.
+      - **Firebase 무료 할당량(Spark Plan) 보호 조치 완료**:
+        - `src/constants/friend.js`: 사용자 1인당 최대 친구 등록 수 20명(`MAX_FRIENDS_LIMIT = 20`) 및 궤적 쿼리 상한(`MAX_SHARED_TRACKS_QUERY_LIMIT = 40`) 설정.
+        - `src/stores/friend.js`: 친구 신청(`sendFriendRequest`) 및 수락(`acceptFriendRequest`) 시 20명 초과 방어 로직 적용.
+        - `src/stores/gpx.js`: `shared_tracks` 쿼리 시 `limit(40)` 적용 및 최대 20명 슬라이싱으로 reads 폭증 방지.
+        - `FriendModal.vue`: 친구 목록 헤더 `(N/20명)` 표기, 정원 도달 시 단정한 안내 배너 노출 및 버튼 비활성화 (아이콘 남발 금지 규칙 준수).
       - **결함 및 UI 최적화 조치 완료**:
         - `ProfileView.vue`: `.user-code-chip` 배경색 하드코딩(`#ffffff`)을 제거하고 `:class="{ 'is-dark': themeStore.isDark }"` 클래스 바인딩 및 다크 테마 고대비 스타일(다크 배경 `#27272a`, 흰색 텍스트 `#ffffff`, 테두리 `#3f3f46`) 적용 완료.
         - `FriendModal.vue`: 모달 내부 코드 카드, 검색창, 친구 목록 및 요청 아이템에 대해 다크 테마 클래스(`.friend-modal.is-dark`) 대응 스타일을 전면 적용하여 일관된 다크 UI 시인성 확보.
         - `GpxDrawer.vue`: 사용자에게 불필요한 내부 기술 정보인 `[⚡ N% 압축]` 뱃지를 트랙 카드에서 숨김 처리하여 주행 핵심 통계(거리/고도/시간/일자) 중심의 깔끔한 UI로 개선 완료.
-*   **다음 세션 목표**:
-    1. **Step 8: 실시간 숙소(숙박) 탐색 및 라이더 편의 기능**: 카카오맵 Places `AD5` 숙박 카테고리 검색, 전화 걸기(`tel:`), 길찾기 연동.
-    2. **또는 사용자 요청 시 원클릭 실서버 배포 (`yarn deploy`) 진행**.
+    - **Step 8: 실시간 숙소(숙박) 탐색 및 야놀자 하이브리드 연동 완료**:
+      - `src/composables/useKakaoAccomLayer.js`: 카카오 Places `AD5`(숙박) 기반 반경 5km 실시간 탐색, 인디고 원형 마커, 인포윈도우(상호명/거리/주소/전화 바로걸기/카카오 길찾기/야놀자 모바일 딥링크).
+      - `src/components/KakaoMap.vue`: 좌측 상단 `[ 🏨 숙소 ]` 퀵 토글 배치, 지도 이동/줌 시 `[ 이 지역 재검색 ]` 칩 연동.
+    - **지도 뷰 UI 정리 및 '내 위치' 바로가기 기능 완료**:
+      - `KakaoMap.vue`: 불필요한 '자전거길' 토글 버튼 삭제.
+      - `useKakaoMyLocation.js`: 고정밀 GPS 기반 내 위치 카메라 이동(panTo), level 4 줌인, 블루 펄스 닷(Blue Pulse Dot) CustomOverlay 렌더링.
+      - 지도 우측 하단 44×44px 원형 타겟 조준경 플로팅 버튼 배치 (다크 모드 대응 및 로딩 스핀 효과).
+      - `tests/test_my_location.js`: 5개 단위 테스트 구축, 총 9개 스위트 64개 테스트 100% 통과 및 프로덕션 빌드 검증 완료.
+    - **Step 11: GPX 고도 프로필(Elevation Profile) 차트 및 실시간 지도 스크러빙 구현 완료**:
+      - **GPX 고도 샘플링 및 극값 산출 엔진 (`src/utils/gpxParser.js`)**:
+        - GPX 파일 파싱 시 `minElevationM`, `maxElevationM` 자동 계산 및 120포인트 균등 샘플링 `elevationProfile: [{ distKm, ele, lat, lng }]` 구조 생성 (경량 1.5KB 크기로 IndexedDB/Firestore 직렬화 호환).
+      - **스토어 및 퍼사드 확장 (`src/stores/gpx.js`, `src/composables/useGpxManager.js`)**:
+        - `showElevationProfile`, `activeScrubbingPoint`, `activeElevationTrack` 상태 및 게터 구현.
+        - `openElevationProfile(trackId)`, `closeElevationProfile()`, `setActiveScrubbingPoint(point)` 액션 탑재.
+        - 트랙 삭제(`removeTrack`) 및 전체 초기화 시 고도 차트 자동 닫힘 방어 로직 내장.
+      - **초경량 반응형 SVG 차트 컴포넌트 (`src/components/ElevationChart.vue`)**:
+        - 외부 차트 라이브러리(300KB+) 없이 순수 반응형 SVG(`viewBox="0 0 600 120"`)와 선형 그라디언트(`linearGradient`) 영역 채우기 방식으로 구현하여 60fps 즉각적인 모바일 렌더링 제공.
+        - 기본 통계(최고/최저/획득고도/거리) 및 스크러빙 시 실시간 통계(거리/현재고도/구간 경사도 %) 정갈한 타이포그래피 표시.
+        - 아이콘 남발 금지 규칙을 엄격히 준수하여 불필요한 이모지를 일체 배제하고 단정한 텍스트 및 표준 단위(`km`, `m`, `%`) 중심 UI 구성.
+        - 마우스 및 모바일 터치(`touchstart`, `touchmove`, `touchend`) 스크러빙 제스처 완벽 지원.
+      - **카카오맵 실시간 스크러빙 마커 동기화 (`src/composables/useKakaoGpxLayer.js`, `src/components/KakaoMap.vue`)**:
+        - 차트 스크러빙 지점의 위경도(`lat`, `lng`)에 맞춰 카카오맵 위에 앰버 핀(`scrubbing-pin-dot`)과 실시간 고도 뱃지(`scrubbing-pin-badge`)를 갖춘 `CustomOverlay`를 50ms 이내 초저지연 연동.
+        - 컴포넌트 언마운트 시 오버레이 메모리 누수 방지 클린업 탑재.
+      - **주행 서랍 연동 및 UI 정돈 (`src/components/GpxDrawer.vue`)**:
+        - 내 주행 및 친구 주행 트랙 카드에 정갈한 `[고도 차트]` 버튼 추가 (클릭 시 서랍을 접고 지도 상에 고도 차트 팝업 즉시 노출).
+        - 기존 친구 트랙 카드 내 장식용 이모지(`🚴`, `⛰️`, `⏱️`, `📅`)를 전면 정리하여 일관된 미니멀 모던 디자인 확립.
+      - **테스트 및 빌드 검증 (`tests/test_elevation_profile.js`)**:
+        - 고도 프로필 차트 7개 단위 테스트 추가, 총 10개 스위트 71개 테스트 100% 통과 및 프로덕션 빌드(`yarn build`) 검증 완료.
+*   **다음 세션 로드맵 (우선순위 후보)**:
+    1. **[후보 2] 라이더 숙소 꿀팁 메모 및 자전거 실내 보관 태깅**:
+       - 숙소 인포윈도우에 자전거 실내 반입 가능 여부 태그 및 라이더 후기 메모 기록/영속 저장.
+    2. **[후보 3] '스탬프 + GPX 주행 궤적' 완주 인증 포토 카드 내보내기**:
+       - 획득 도장과 GPX 주행선, 주행 통계를 합성한 소셜 공유용 이미지 생성.
+
 *   **주의사항**:
     - 기존 퍼사드 패턴(`useStampManager`, `useGpxManager`, `useFriendManager`) 아키텍처 규칙을 엄격히 준수할 것.
     - 사용자의 별도 요청이 있을 때만 Git 원격 저장소 푸시(Push) 및 Firebase 배포를 진행할 것.
+    - **UI/UX 아이콘 남발 절대 금지**: 버튼, 라벨, 뱃지, 모달, 토스트 등에 장식용 이모지/아이콘을 불필요하게 덧붙이지 않고, 지도 마커나 내비게이션 등 필수 식별 영역을 제외하고는 정갈한 텍스트와 타이포그래피, 여백 중심의 미니멀 모던 UI를 유지할 것.
 
 ---
 

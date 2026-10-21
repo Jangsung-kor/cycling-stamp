@@ -3,6 +3,7 @@ import { showToast, showSuccessToast, showFailToast, showConfirmDialog } from 'v
 import { useFriendStore } from '../stores/friend.js'
 import { auth } from '../services/firebase.js'
 import { normalizeUserCode } from '../utils/userCodeGenerator.js'
+import { MAX_FRIENDS_LIMIT } from '../constants/friend.js'
 
 /**
  * N:N 친구 시스템 단일 관리 창구 (Facade Composable)
@@ -23,6 +24,8 @@ export function useFriendManager() {
   const pendingRequestCount = computed(() => friendStore.pendingRequestCount)
   const selectedFriend = computed(() => friendStore.selectedFriend)
   const isLoading = computed(() => friendStore.isLoading)
+  const isFriendLimitReached = computed(() => friendStore.isFriendLimitReached)
+  const maxFriendsLimit = MAX_FRIENDS_LIMIT
 
   // 인증 여부
   const isAuthenticated = computed(() => !!auth?.currentUser)
@@ -202,6 +205,8 @@ export function useFriendManager() {
     pendingRequestCount,
     selectedFriend,
     isLoading,
+    isFriendLimitReached,
+    maxFriendsLimit,
     isAuthenticated,
 
     // 유틸/판별 메서드

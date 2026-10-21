@@ -5,19 +5,6 @@
     <!-- 좌측 상단: 자전거도로 및 보급소(편의점) 퀵 토글 버튼 -->
     <div :class="['supply-control-panel', { 'is-dark': themeStore.bgThemeKey === 'dark' }]">
       <div class="toggle-btn-row">
-        <!-- 1. 카카오 공식 자전거 도로망 레이어 토글 버튼 -->
-        <button 
-          :class="['supply-toggle-btn', { active: isBicycleLayerActive }]"
-          @click="toggleBicycleLayer"
-          :style="isBicycleLayerActive ? {
-            backgroundColor: '#059669',
-            borderColor: '#059669',
-            color: '#ffffff'
-          } : {}"
-        >
-          <span class="supply-icon">🚲</span>
-          <span class="supply-label">자전거길</span>
-        </button>
 
         <!-- 2. 보급소(편의점) 퀵 토글 버튼 -->
         <button 
@@ -36,7 +23,24 @@
           </span>
         </button>
 
-        <!-- 3. 친구 주행 궤적 레이어 퀵 토글 버튼 -->
+        <!-- 3. 숙소(숙박) 퀵 토글 버튼 -->
+        <button 
+          :class="['supply-toggle-btn', { active: isAccomFilterActive }]"
+          @click="toggleAccomFilter"
+          :style="isAccomFilterActive ? {
+            backgroundColor: '#4f46e5',
+            borderColor: '#4f46e5',
+            color: '#ffffff'
+          } : {}"
+        >
+          <span class="supply-icon">🏨</span>
+          <span class="supply-label">숙소</span>
+          <span v-if="isAccomFilterActive && accomList.length > 0" class="supply-badge">
+            {{ accomList.length }}
+          </span>
+        </button>
+
+        <!-- 4. 친구 주행 궤적 레이어 퀵 토글 버튼 -->
         <button 
           v-if="gpxStore.friendTracksCount > 0"
           :class="['supply-toggle-btn', { active: isFriendTracksLayerActive }]"
@@ -57,24 +61,57 @@
 
       <!-- 지도 이동 시 노출되는 '이 지역 재검색' 버튼 -->
       <button 
-        v-if="isStoreFilterActive && showRefreshBtn" 
+        v-if="(isStoreFilterActive && showStoreRefreshBtn) || (isAccomFilterActive && showAccomRefreshBtn)" 
         class="refresh-area-btn" 
-        @click="searchConvenienceStores(true)"
+        @click="handleRefreshArea"
       >
-        <span>🔄 이 지역 재검색</span>
+        <span>이 지역 재검색</span>
       </button>
     </div>
+
+    <!-- 우측 하단: 내 위치 바로가기 플로팅 버튼 -->
+    <button 
+      type="button"
+      :class="['my-location-btn', { 'is-loading': isLocating, 'is-dark': themeStore.bgThemeKey === 'dark' }]"
+      @click="moveToMyLocation"
+      :disabled="isLocating"
+      title="내 위치로 이동"
+    >
+      <svg 
+        class="location-icon" 
+        viewBox="0 0 24 24" 
+        width="20" 
+        height="20" 
+        fill="none" 
+        stroke="currentColor" 
+        stroke-width="2.2" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="7" />
+        <line x1="12" y1="2" x2="12" y2="5" />
+        <line x1="12" y1="19" x2="12" y2="22" />
+        <line x1="2" y1="12" x2="5" y2="12" />
+        <line x1="19" y1="12" x2="22" y2="12" />
+      </svg>
+    </button>
+
+    <!-- 5. GPX 고도 프로필 차트 (인터랙티브 스크러빙 & 카카오맵 연동) -->
+    <ElevationChart />
 
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue' 
+import { ref, onMounted, onUnmounted, watch } from 'vue' 
 import { showToast } from 'vant'
 import { useStampManager } from '../composables/useStampManager'
 import { useGpxStore } from '../stores/gpx'
 import { useKakaoStoreLayer } from '../composables/useKakaoStoreLayer'
+import { useKakaoAccomLayer } from '../composables/useKakaoAccomLayer'
+import { useKakaoMyLocation } from '../composables/useKakaoMyLocation'
 import { useKakaoGpxLayer } from '../composables/useKakaoGpxLayer'
+import ElevationChart from './ElevationChart.vue'
 
 const stampManager = useStampManager()
 const { stampStore, themeStore, certCenters, getStampSvg: getStampImageUrl } = stampManager
@@ -83,31 +120,32 @@ const gpxStore = useGpxStore()
 let mapInstance = null
 const markerList = []
 
-// 1. 카카오 공식 자전거 도로망(BICYCLE) 오버레이 레이어 상태 (기본 활성화)
-const isBicycleLayerActive = ref(true)
-
-const toggleBicycleLayer = () => {
-  if (!mapInstance || !window.kakao || !window.kakao.maps.MapTypeId) return
-  isBicycleLayerActive.value = !isBicycleLayerActive.value
-  if (isBicycleLayerActive.value) {
-    mapInstance.addOverlayMapTypeId(window.kakao.maps.MapTypeId.BICYCLE)
-    showToast({ message: '🚲 카카오 공식 자전거 도로망을 켰습니다.', duration: 1500 })
-  } else {
-    mapInstance.removeOverlayMapTypeId(window.kakao.maps.MapTypeId.BICYCLE)
-    showToast({ message: '자전거 도로망을 껐습니다.', duration: 1500 })
-  }
-}
-
 // 2. 보급소(편의점) 검색 레이어 매니저 (퍼사드 추출)
 const storeLayer = useKakaoStoreLayer(() => mapInstance)
 const {
   isStoreFilterActive,
   storeList,
-  showRefreshBtn,
+  showRefreshBtn: showStoreRefreshBtn,
   toggleStoreFilter,
   searchConvenienceStores,
-  handleMapMovement
+  handleMapMovement: handleStoreMapMovement
 } = storeLayer
+
+// 3. 숙소(숙박) 검색 레이어 매니저 (퍼사드 추출)
+const accomLayer = useKakaoAccomLayer(() => mapInstance)
+const {
+  isAccomFilterActive,
+  accomList,
+  showRefreshBtn: showAccomRefreshBtn,
+  toggleAccomFilter,
+  searchAccommodations,
+  handleMapMovement: handleAccomMapMovement
+} = accomLayer
+
+const handleRefreshArea = () => {
+  if (isStoreFilterActive.value) searchConvenienceStores(true)
+  if (isAccomFilterActive.value) searchAccommodations(true)
+}
 
 // 3. 나만의 주행 기록(GPX 궤적) 레이어 매니저 (퍼사드 추출)
 const gpxLayer = useKakaoGpxLayer(() => mapInstance, themeStore, gpxStore)
@@ -117,8 +155,23 @@ const {
   updateGpxHoverState,
   updateFriendGpxHoverState,
   toggleFriendTracksLayer,
-  zoomToTrack
+  zoomToTrack,
+  updateScrubbingMarker,
+  clearScrubbingMarker
 } = gpxLayer
+
+// 4. 내 위치 바로가기 매니저
+const myLocationManager = useKakaoMyLocation(() => mapInstance)
+const {
+  isLocating,
+  moveToMyLocation,
+  clearLocationMarker
+} = myLocationManager
+
+onUnmounted(() => {
+  clearLocationMarker()
+  clearScrubbingMarker()
+})
 
 onMounted(() => {
   if (window.kakao && window.kakao.maps && window.kakao.maps.LatLng) {
@@ -212,6 +265,11 @@ watch(() => gpxStore.selectedFriendTrackId, (newId) => {
   }
 })
 
+// GPX 고도 차트 스크러빙 마커 실시간 연동
+watch(() => gpxStore.activeScrubbingPoint, (newPoint) => {
+  updateScrubbingMarker(newPoint)
+})
+
 const initMap = () => {
   const container = document.getElementById('map')
   if (!container || !window.kakao.maps.LatLng) return
@@ -223,11 +281,6 @@ const initMap = () => {
   const map = new window.kakao.maps.Map(container, options)
   mapInstance = map
   window.kakaoMap = map
-
-  // 0. 카카오 공식 자전거 도로망(BICYCLE) 레이어 기본 활성화
-  if (isBicycleLayerActive.value && window.kakao.maps.MapTypeId?.BICYCLE) {
-    map.addOverlayMapTypeId(window.kakao.maps.MapTypeId.BICYCLE)
-  }
   
   // 1. 나만의 주행 기록 (GPX 궤적) 렌더링
   renderGpxPolylines()
@@ -276,11 +329,13 @@ const initMap = () => {
 
   // 3. 지도 이동 및 줌 변경 시 '이 지역 재검색' 버튼 노출 (레이어 매니저 위임)
   window.kakao.maps.event.addListener(map, 'dragend', () => {
-    handleMapMovement()
+    handleStoreMapMovement()
+    handleAccomMapMovement()
   })
 
   window.kakao.maps.event.addListener(map, 'zoom_changed', () => {
-    handleMapMovement()
+    handleStoreMapMovement()
+    handleAccomMapMovement()
   })
 }
 </script>
@@ -415,5 +470,128 @@ const initMap = () => {
 @keyframes supplyFadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* 우측 하단 내 위치 플로팅 버튼 */
+.my-location-btn {
+  position: absolute;
+  bottom: 74px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+}
+
+.my-location-btn:active {
+  transform: scale(0.92);
+  background: #f8fafc;
+}
+
+.my-location-btn.is-dark {
+  background: #27272a;
+  border-color: #3f3f46;
+  color: #f4f4f5;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.my-location-btn.is-dark:active {
+  background: #3f3f46;
+}
+
+.my-location-btn.is-loading .location-icon {
+  animation: loc-spin 1s infinite linear;
+  color: #2563eb;
+}
+
+@keyframes loc-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 내 위치 펄스 마커 (카카오맵 CustomOverlay 내부) */
+:deep(.my-location-pulse-marker) {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+:deep(.my-location-pulse-marker .dot-core) {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  top: 5px;
+  left: 5px;
+  background-color: #2563eb;
+  border: 2.5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+}
+
+:deep(.my-location-pulse-marker .pulse-ring) {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  top: -4px;
+  left: -4px;
+  border-radius: 50%;
+  background-color: rgba(37, 99, 235, 0.28);
+  animation: my-loc-pulse 2s infinite ease-out;
+  z-index: 1;
+}
+
+@keyframes my-loc-pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+/* GPX 고도 차트 실시간 스크러빙 마커 */
+:deep(.gpx-scrubbing-marker) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  transform: translate3d(0, -100%, 0);
+  transition: transform 0.04s ease-out;
+}
+
+:deep(.scrubbing-pin-badge) {
+  background: rgba(15, 23, 42, 0.92);
+  color: #38bdf8;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+
+:deep(.scrubbing-pin-dot) {
+  width: 14px;
+  height: 14px;
+  background-color: #f59e0b;
+  border: 2.5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.85);
 }
 </style>

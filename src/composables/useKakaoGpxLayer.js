@@ -17,6 +17,9 @@ export function useKakaoGpxLayer(getMapInstance, themeStore, gpxStore) {
   // 친구 주행선 전용 스타일 컬러 (일렉트릭 시안 / 틸)
   const FRIEND_LINE_COLOR = '#06b6d4'
 
+  // 실시간 고도 차트 스크러빙 커스텀 오버레이
+  let scrubbingOverlay = null
+
   /**
    * 내 트랙 폴리라인 정리
    */
@@ -42,11 +45,63 @@ export function useKakaoGpxLayer(getMapInstance, themeStore, gpxStore) {
   }
 
   /**
-   * 전체 폴리라인 메모리 정리
+   * 고도 차트 스크러빙 시 지도 위 실시간 위치 마커 업데이트
+   * @param {{ distKm: number, ele: number, lat: number, lng: number } | null} point
+   */
+  const updateScrubbingMarker = (point) => {
+    const map = getMapInstance()
+    if (!map || !window.kakao || !window.kakao.maps.CustomOverlay) return
+
+    if (!point || !point.lat || !point.lng) {
+      if (scrubbingOverlay) {
+        scrubbingOverlay.setMap(null)
+      }
+      return
+    }
+
+    const pos = new window.kakao.maps.LatLng(point.lat, point.lng)
+
+    if (!scrubbingOverlay) {
+      const el = document.createElement('div')
+      el.className = 'gpx-scrubbing-marker'
+      el.innerHTML = `
+        <div class="scrubbing-pin-badge">${point.ele || 0}m</div>
+        <div class="scrubbing-pin-dot"></div>
+      `
+      scrubbingOverlay = new window.kakao.maps.CustomOverlay({
+        map,
+        position: pos,
+        content: el,
+        yAnchor: 1.0,
+        zIndex: 50
+      })
+    } else {
+      scrubbingOverlay.setPosition(pos)
+      const badge = scrubbingOverlay.getContent().querySelector('.scrubbing-pin-badge')
+      if (badge) {
+        badge.textContent = `${point.ele || 0}m`
+      }
+      scrubbingOverlay.setMap(map)
+    }
+  }
+
+  /**
+   * 스크러빙 마커 정리
+   */
+  const clearScrubbingMarker = () => {
+    if (scrubbingOverlay) {
+      scrubbingOverlay.setMap(null)
+      scrubbingOverlay = null
+    }
+  }
+
+  /**
+   * 전체 폴리라인 및 스크러빙 마커 메모리 정리
    */
   const clearGpxPolylines = () => {
     clearMyPolylines()
     clearFriendPolylines()
+    clearScrubbingMarker()
   }
 
   /**
@@ -212,6 +267,8 @@ export function useKakaoGpxLayer(getMapInstance, themeStore, gpxStore) {
     updateFriendGpxHoverState,
     toggleFriendTracksLayer,
     zoomToTrack,
+    updateScrubbingMarker,
+    clearScrubbingMarker,
     clearGpxPolylines
   }
 }

@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore'
 import { db, auth } from '../services/firebase.js'
 import { generateUserCode, normalizeUserCode, validateUserCode } from '../utils/userCodeGenerator.js'
+import { MAX_FRIENDS_LIMIT } from '../constants/friend.js'
 
 export const useFriendStore = defineStore('friend', {
   state: () => ({
@@ -41,7 +42,13 @@ export const useFriendStore = defineStore('friend', {
     hasSentRequestTo: (state) => (uid) => state.outgoingRequests.some(r => r.targetUid === uid),
 
     // UID로 친구 정보 단일 조회
-    getFriendByUid: (state) => (uid) => state.friends.find(f => f.friendUid === uid) || null
+    getFriendByUid: (state) => (uid) => state.friends.find(f => f.friendUid === uid) || null,
+
+    // 최대 친구 수 도달 여부
+    isFriendLimitReached: (state) => state.friends.length >= MAX_FRIENDS_LIMIT,
+
+    // 최대 친구 수 상한값
+    maxFriendsLimit: () => MAX_FRIENDS_LIMIT
   },
 
   actions: {
@@ -149,6 +156,11 @@ export const useFriendStore = defineStore('friend', {
       const currentUserPhoto = auth?.currentUser?.photoURL || null
       const currentCode = this.currentUserCode || 'CY-TEST'
 
+      // 0. 최대 친구 정원(20명) 초과 방지
+      if (this.friends.length >= MAX_FRIENDS_LIMIT) {
+        return { success: false, message: `친구는 최대 ${MAX_FRIENDS_LIMIT}명까지만 등록할 수 있습니다.` }
+      }
+
       // 1. 자기 자신에게 요청 방지
       if (targetUser.uid === currentUid) {
         return { success: false, message: '나 자신에게는 친구 신청을 보낼 수 없습니다.' }
@@ -205,6 +217,11 @@ export const useFriendStore = defineStore('friend', {
       const currentUserName = auth?.currentUser?.displayName || '나'
       const currentUserPhoto = auth?.currentUser?.photoURL || null
       const currentCode = this.currentUserCode || 'CY-TEST'
+      // 0. 최대 친구 정원(20명) 초과 방지
+      if (this.friends.length >= MAX_FRIENDS_LIMIT) {
+        return { success: false, message: `친구 정원(최대 ${MAX_FRIENDS_LIMIT}명)이 초과되어 수락할 수 없습니다. 기존 친구를 정리한 후 다시 시도해 주세요.` }
+      }
+
       const now = new Date().toISOString()
 
       try {

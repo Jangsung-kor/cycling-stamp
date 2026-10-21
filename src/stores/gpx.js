@@ -7,8 +7,10 @@ import {
   collection,
   getDocs,
   query,
-  where
+  where,
+  limit
 } from 'firebase/firestore'
+import { MAX_SHARED_TRACKS_QUERY_LIMIT } from '../constants/friend.js'
 import { db, auth } from '../services/firebase.js'
 import {
   saveTrackToDb,
@@ -50,6 +52,8 @@ export const useGpxStore = defineStore('gpx', {
     friendTracks: [],
     selectedFriendTrackId: null,
     hoveredFriendTrackId: null,
+    showElevationProfile: false,
+    activeScrubbingPoint: null,
     isLoaded: false,
     isLoading: false,
     error: null
@@ -84,7 +88,18 @@ export const useGpxStore = defineStore('gpx', {
     selectedFriendTrack: (state) => state.friendTracks.find(t => t.id === state.selectedFriendTrackId) || null,
 
     // 현재 마우스 호버된 친구 트랙 상세
-    hoveredFriendTrack: (state) => state.friendTracks.find(t => t.id === state.hoveredFriendTrackId) || null
+    hoveredFriendTrack: (state) => state.friendTracks.find(t => t.id === state.hoveredFriendTrackId) || null,
+
+    // 현재 고도 차트를 표시할 활성 트랙 (내 트랙 또는 친구 트랙)
+    activeElevationTrack: (state) => {
+      if (state.selectedTrackId) {
+        return state.tracks.find(t => t.id === state.selectedTrackId) || null
+      }
+      if (state.selectedFriendTrackId) {
+        return state.friendTracks.find(t => t.id === state.selectedFriendTrackId) || null
+      }
+      return null
+    }
   },
 
   actions: {
@@ -200,6 +215,9 @@ export const useGpxStore = defineStore('gpx', {
           simplified: parsedData.coordinates.length,
           compressionRate: '0%'
         },
+        minElevationM: parsedData.minElevationM ?? 0,
+        maxElevationM: parsedData.maxElevationM ?? 0,
+        elevationProfile: parsedData.elevationProfile || [],
         coordinates: parsedData.coordinates,
         visible: true,
         visibility: 'private', // 기본값: 나만보기
@@ -287,6 +305,7 @@ export const useGpxStore = defineStore('gpx', {
 
       if (this.selectedTrackId === trackId) {
         this.selectedTrackId = null
+        this.closeElevationProfile()
       }
       if (this.hoveredTrackId === trackId) {
         this.hoveredTrackId = null
@@ -352,9 +371,10 @@ export const useGpxStore = defineStore('gpx', {
       }
 
       try {
+        const safeFriendUids = friendUids.slice(0, 20)
         const chunks = []
-        for (let i = 0; i < friendUids.length; i += 30) {
-          chunks.push(friendUids.slice(i, i + 30))
+        for (let i = 0; i < safeFriendUids.length; i += 30) {
+          chunks.push(safeFriendUids.slice(i, i + 30))
         }
 
         let allShared = []
@@ -362,7 +382,8 @@ export const useGpxStore = defineStore('gpx', {
           const q = query(
             collection(db, 'shared_tracks'),
             where('authorUid', 'in', chunk),
-            where('visibility', '==', 'friends')
+            where('visibility', '==', 'friends'),
+            limit(MAX_SHARED_TRACKS_QUERY_LIMIT)
           )
           const querySnap = await getDocs(q)
           querySnap.forEach(docSnap => {
@@ -441,8 +462,47 @@ export const useGpxStore = defineStore('gpx', {
       this.hoveredTrackId = null
       this.selectedFriendTrackId = null
       this.hoveredFriendTrackId = null
+      this.closeElevationProfile()
       await clearAllTracksFromDb()
       await this.syncTracksToFirestore()
+    },
+
+    /**
+     * 고도 프로필 차트 열기
+     * @param {string} [trackId] 특정 트랙 ID (생략 시 현재 활성 트랙)
+     */
+    openElevationProfile(trackId) {
+      if (trackId) {
+        const myTrack = this.tracks.find(t => t.id === trackId)
+        if (myTrack) {
+          this.selectedTrackId = trackId
+          this.selectedFriendTrackId = null
+        } else {
+          const fTrack = this.friendTracks.find(t => t.id === trackId)
+          if (fTrack) {
+            this.selectedFriendTrackId = trackId
+            this.selectedTrackId = null
+          }
+        }
+      }
+      this.showElevationProfile = true
+      this.activeScrubbingPoint = null
+    },
+
+    /**
+     * 고도 프로필 차트 닫기
+     */
+    closeElevationProfile() {
+      this.showElevationProfile = false
+      this.activeScrubbingPoint = null
+    },
+
+    /**
+     * 고도 차트 호버/스크러빙 시 해당 지점 정보 설정
+     * @param {{ distKm: number, ele: number, lat: number, lng: number } | null} point
+     */
+    setActiveScrubbingPoint(point) {
+      this.activeScrubbingPoint = point || null
     }
   }
 })

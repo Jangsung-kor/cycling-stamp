@@ -50,6 +50,10 @@
             </button>
           </div>
 
+          <div v-if="isFriendLimitReached" class="limit-warning-banner">
+            최대 친구 정원({{ maxFriendsLimit }}명)에 도달하여 추가 친구 신청을 할 수 없습니다.
+          </div>
+
           <!-- 검색 결과 카드 -->
           <div v-if="searchedUser" class="search-result-card">
             <div class="user-avatar-col">
@@ -67,6 +71,14 @@
             <div class="user-action-col">
               <span v-if="isFriend(searchedUser.uid)" class="status-badge friend">친구</span>
               <span v-else-if="hasSentRequestTo(searchedUser.uid)" class="status-badge requested">신청됨</span>
+              <button
+                v-else-if="isFriendLimitReached"
+                type="button"
+                class="action-btn request disabled"
+                disabled
+              >
+                정원 초과
+              </button>
               <button
                 v-else
                 type="button"
@@ -107,10 +119,12 @@
                 <button
                   type="button"
                   class="action-btn accept"
-                  :style="{ backgroundColor: themeColor }"
+                  :class="{ disabled: isFriendLimitReached }"
+                  :style="isFriendLimitReached ? {} : { backgroundColor: themeColor }"
+                  :disabled="isFriendLimitReached"
                   @click="acceptRequest(req)"
                 >
-                  수락
+                  {{ isFriendLimitReached ? '정원 초과' : '수락' }}
                 </button>
                 <button
                   type="button"
@@ -128,7 +142,7 @@
         <div class="section-card">
           <div class="section-title">
             <span>내 친구 목록</span>
-            <span class="sub-count">({{ friendCount }}명)</span>
+            <span class="sub-count">({{ friendCount }}/{{ maxFriendsLimit }}명)</span>
           </div>
 
           <div v-if="friendCount > 0" class="friend-list">
@@ -199,6 +213,8 @@ const {
   friends,
   incomingRequests,
   friendCount,
+  isFriendLimitReached,
+  maxFriendsLimit,
   isFriend,
   hasSentRequestTo,
   searchUser,
@@ -480,6 +496,27 @@ const handleSendRequest = async () => {
   transform: scale(0.96);
 }
 
+.action-btn.disabled,
+.action-btn:disabled {
+  background: #cbd5e1 !important;
+  color: #64748b !important;
+  cursor: not-allowed;
+  opacity: 0.8;
+  transform: none !important;
+}
+
+.limit-warning-banner {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  font-size: 11.5px;
+  color: #b91c1c;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
 /* 받은 요청 목록 */
 .request-list {
   display: flex;
@@ -668,5 +705,17 @@ const handleSendRequest = async () => {
 
 .friend-modal.is-dark .request-name {
   color: #fecaca;
+}
+
+.friend-modal.is-dark .limit-warning-banner {
+  background-color: #450a0a;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+.friend-modal.is-dark .action-btn.disabled,
+.friend-modal.is-dark .action-btn:disabled {
+  background-color: #3f3f46 !important;
+  color: #71717a !important;
 }
 </style>

@@ -110,6 +110,12 @@ runTest('3-1. 거리, 획득고도, 주행시간, 바운딩 박스 계산 정합
   // 좌표 배열 형식 [lat, lng]
   assert.strictEqual(res.coordinates.length > 0, true)
   assert.strictEqual(res.coordinates[0].length, 2)
+  // 고도 프로필 정합성
+  assert.strictEqual(res.minElevationM, 15)
+  assert.strictEqual(res.maxElevationM, 40)
+  assert.strictEqual(res.elevationProfile.length, 4)
+  assert.strictEqual(res.elevationProfile[0].ele, 15)
+  assert.strictEqual(res.elevationProfile[3].ele, 40)
 })
 
 runTest('3-2. 고도/시간 정보가 누락된 GPX 파일도 정상 처리 (안전성)', () => {
@@ -129,6 +135,9 @@ runTest('3-2. 고도/시간 정보가 누락된 GPX 파일도 정상 처리 (안
   assert.strictEqual(res.elevationGainM, 0) // 고도 없으면 0
   assert.strictEqual(res.durationMinutes, 0) // 시간 없으면 0
   assert.ok(res.distanceKm > 1.0, '거리 계산 정상 작동')
+  assert.strictEqual(res.minElevationM, null)
+  assert.strictEqual(res.maxElevationM, null)
+  assert.strictEqual(res.elevationProfile.length, 0)
 })
 
 runTest('3-3. lon 속성이 먼저 오거나 셀프 클로징 태그인 GPX 호환성 검증', () => {

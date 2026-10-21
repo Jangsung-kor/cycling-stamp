@@ -210,6 +210,40 @@ async function runAll() {
     assert.strictEqual(res2, null)
   })
 
+  // ==========================================
+  // 7. 친구 정원(MAX_FRIENDS_LIMIT = 20) 상한 방어 검증
+  // ==========================================
+  await runTest('7-1. 최대 친구 수 도달 여부 Getter 및 상한선 검증', () => {
+    friendStore.clearState()
+    assert.strictEqual(friendStore.maxFriendsLimit, 20)
+    assert.strictEqual(friendStore.isFriendLimitReached, false)
+
+    for (let i = 1; i <= 20; i++) {
+      friendStore.friends.push({
+        friendUid: `friend-${i}`,
+        displayName: `친구${i}`,
+        userCode: `CY-F${i}`
+      })
+    }
+
+    assert.strictEqual(friendStore.friendCount, 20)
+    assert.strictEqual(friendStore.isFriendLimitReached, true)
+  })
+
+  await runTest('7-2. 친구 정원(20명) 초과 시 친구 신청 전송 차단', async () => {
+    const newTarget = { uid: 'rider-21', displayName: '21번째라이더', userCode: 'CY-9999' }
+    const res = await friendStore.sendFriendRequest(newTarget)
+    assert.strictEqual(res.success, false)
+    assert.ok(res.message.includes('최대 20명'))
+  })
+
+  await runTest('7-3. 친구 정원(20명) 초과 시 친구 요청 수락 차단', async () => {
+    const req = { senderUid: 'pending-21', senderName: '대기라이더', senderCode: 'CY-8888' }
+    const res = await friendStore.acceptFriendRequest(req)
+    assert.strictEqual(res.success, false)
+    assert.ok(res.message.includes('정원') && res.message.includes('초과'))
+  })
+
   console.log('\n========================================')
   console.log(`소셜 그래프 & 친구 시스템 테스트 결과: ${passedCount} 통과, ${failedCount} 실패`)
   console.log('========================================\n')

@@ -39,6 +39,11 @@ export function useGpxManager() {
   const selectedFriendTrack = computed(() => gpxStore.selectedFriendTrack)
   const hoveredFriendTrack = computed(() => gpxStore.hoveredFriendTrack)
 
+  // 고도 프로필 차트 및 스크러빙 상태
+  const showElevationProfile = computed(() => gpxStore.showElevationProfile)
+  const activeScrubbingPoint = computed(() => gpxStore.activeScrubbingPoint)
+  const activeElevationTrack = computed(() => gpxStore.activeElevationTrack)
+
   // 로그인 및 클라우드 동기화 상태
   const isAuthenticated = computed(() => !!auth?.currentUser)
 
@@ -188,6 +193,11 @@ export function useGpxManager() {
     }
   }
 
+  // 고도 프로필 차트 제어 액션
+  const openElevationProfile = (trackId) => gpxStore.openElevationProfile(trackId)
+  const closeElevationProfile = () => gpxStore.closeElevationProfile()
+  const setActiveScrubbingPoint = (point) => gpxStore.setActiveScrubbingPoint(point)
+
   // 포맷팅 헬퍼
   const formatDuration = (minutes) => {
     if (!minutes) return '0분'
@@ -256,6 +266,14 @@ export function useGpxManager() {
     toggleFriendTrackVisibility,
     selectFriendTrack,
     setHoveredFriendTrack,
+
+    // 고도 프로필 차트 상태 및 액션
+    showElevationProfile,
+    activeScrubbingPoint,
+    activeElevationTrack,
+    openElevationProfile,
+    closeElevationProfile,
+    setActiveScrubbingPoint,
 
     // 포맷팅 유틸
     formatDuration,

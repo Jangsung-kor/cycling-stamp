@@ -11,7 +11,6 @@
         boxShadow: `0 4px 14px ${themeStore.currentTheme.main}30`
       } : {}"
     >
-      <span class="trigger-icon">🗺️</span>
       <span class="trigger-text">나만의 주행</span>
       <span 
         v-if="totalTracksCount > 0" 

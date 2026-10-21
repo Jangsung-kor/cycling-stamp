@@ -11,8 +11,8 @@
     <div class="drawer-header">
       <div class="header-title-box">
         <div class="header-title-row">
-          <span class="header-icon">🗺️</span>
-          <span class="header-title">주행 기록 보관함</span>
+
+          <span class="header-title">주행 기록</span>
           <span class="track-count-badge" :style="{ backgroundColor: themeStore.currentTheme.main }">
             총 {{ activeTab === 'my' ? totalTracksCount : friendTracksCount }}개
           </span>
@@ -37,7 +37,7 @@
         :style="activeTab === 'my' ? { borderColor: themeStore.currentTheme.main, color: themeStore.currentTheme.main } : {}"
         @click="switchTab('my')"
       >
-        <span>🚴 내 주행</span>
+        <span>내 주행</span>
         <span class="tab-count-tag" :style="activeTab === 'my' ? { backgroundColor: themeStore.currentTheme.main, color: '#ffffff' } : {}">
           {{ totalTracksCount }}
         </span>
@@ -49,7 +49,7 @@
         :style="activeTab === 'friends' ? { borderColor: '#06b6d4', color: '#0891b2' } : {}"
         @click="switchTab('friends')"
       >
-        <span>👥 친구 주행</span>
+        <span>친구 주행</span>
         <span class="tab-count-tag friend" :style="activeTab === 'friends' ? { backgroundColor: '#06b6d4', color: '#ffffff' } : {}">
           {{ friendTracksCount }}
         </span>
@@ -180,17 +180,25 @@
                 <!-- 2행: 주행 통계 정보 칩 -->
                 <div class="card-stats-row">
                   <span class="stat-chip highlight" :style="{ color: themeStore.currentTheme.main, backgroundColor: `${themeStore.currentTheme.main}12` }">
-                    🚴 {{ track.distanceKm }} km
+                    {{ track.distanceKm }} km
                   </span>
                   <span v-if="track.elevationGainM > 0" class="stat-chip">
-                    ⛰️ {{ track.elevationGainM }} m
+                    {{ track.elevationGainM }} m
                   </span>
                   <span v-if="track.durationMinutes > 0" class="stat-chip">
-                    ⏱️ {{ formatDuration(track.durationMinutes) }}
+                    {{ formatDuration(track.durationMinutes) }}
                   </span>
                   <span class="stat-chip date-chip">
-                    📅 {{ formatDate(track.startTime || track.createdAt) }}
+                    {{ formatDate(track.startTime || track.createdAt) }}
                   </span>
+                  <button
+                    type="button"
+                    class="elevation-btn"
+                    @click.stop="handleOpenElevation(track)"
+                    title="고도 프로필 차트 보기"
+                  >
+                    고도 차트
+                  </button>
                 </div>
               </div>
             </div>
@@ -286,17 +294,25 @@
               <!-- 3행: 주행 통계 정보 칩 -->
               <div class="card-stats-row">
                 <span class="stat-chip highlight friend-chip">
-                  🚴 {{ fTrack.distanceKm }} km
+                  {{ fTrack.distanceKm }} km
                 </span>
                 <span v-if="fTrack.elevationGainM > 0" class="stat-chip">
-                  ⛰️ {{ fTrack.elevationGainM }} m
+                  {{ fTrack.elevationGainM }} m
                 </span>
                 <span v-if="fTrack.durationMinutes > 0" class="stat-chip">
-                  ⏱️ {{ formatDuration(fTrack.durationMinutes) }}
+                  {{ formatDuration(fTrack.durationMinutes) }}
                 </span>
                 <span v-if="fTrack.date || fTrack.startTime || fTrack.createdAt" class="stat-chip date-chip">
-                  📅 {{ formatDate(fTrack.date || fTrack.startTime || fTrack.createdAt) }}
+                  {{ formatDate(fTrack.date || fTrack.startTime || fTrack.createdAt) }}
                 </span>
+                <button
+                  type="button"
+                  class="elevation-btn friend"
+                  @click.stop="handleOpenElevation(fTrack)"
+                  title="고도 프로필 차트 보기"
+                >
+                  고도 차트
+                </button>
               </div>
             </div>
           </div>
@@ -333,7 +349,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['update:show'])
+const emit = defineEmits(['update:show'])
 
 const defaultAvatar = 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
 
@@ -365,8 +381,14 @@ const {
   formatDuration,
   formatDate,
   getVisibilityLabel,
-  getVisibilityIcon
+  getVisibilityIcon,
+  openElevationProfile
 } = gpxManager
+
+const handleOpenElevation = (track) => {
+  openElevationProfile(track.id)
+  emit('update:show', false)
+}
 
 // 친구 시스템 매니저
 const friendManager = useFriendManager()
@@ -959,5 +981,33 @@ const cancelEditTitle = () => {
   color: var(--text-sub, #64748b);
   line-height: 1.5;
   margin: 0;
+}
+.elevation-btn {
+  margin-left: auto;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.elevation-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.elevation-btn.friend {
+  border-color: rgba(6, 182, 212, 0.3);
+  color: #38bdf8;
+  background: rgba(6, 182, 212, 0.1);
+}
+
+.elevation-btn.friend:hover {
+  background: rgba(6, 182, 212, 0.2);
 }
 </style>
