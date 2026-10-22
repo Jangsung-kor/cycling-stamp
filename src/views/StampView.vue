@@ -86,8 +86,17 @@
 
         <!-- 펼침 상세 영역 -->
         <div v-if="isCourseDetailExpanded" class="course-expanded-content">
-          <div v-if="currentCourse.isCompleted" class="course-complete-notice" :style="{ color: themeStore.currentTheme.main }">
-            🎉 {{ currentCourse.tab }}의 모든 인증센터({{ currentCourse.total }}개소) 완주를 축하합니다!
+          <div v-if="currentCourse.isCompleted" class="course-completed-action-row">
+            <div class="course-complete-notice" :style="{ color: themeStore.currentTheme.main }">
+              {{ currentCourse.tab }}의 모든 인증센터({{ currentCourse.total }}개소) 완주를 축하합니다!
+            </div>
+            <button
+              type="button"
+              class="course-cert-card-btn cycling-btn-subtle"
+              @click.stop="handleOpenCourseCert(currentCourse)"
+            >
+              완주 인증 카드 내보내기
+            </button>
           </div>
           <div v-else class="remaining-centers-box">
             <div class="remaining-title">
@@ -253,6 +262,16 @@
           <p v-else-if="selectedCenter.isAcquired">
             <strong>획득 일시:</strong> {{ formatDate(selectedCenter.acquiredAt) }}
           </p>
+
+          <div v-if="selectedCenter.isAcquired" class="dialog-action-box">
+            <button
+              type="button"
+              class="stamp-cert-card-btn cycling-btn-subtle"
+              @click="handleOpenSingleStampCert(selectedCenter)"
+            >
+              인증 카드 내보내기
+            </button>
+          </div>
         </div>
       </div>
     </van-dialog>
@@ -263,9 +282,40 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStampManager } from '../composables/useStampManager'
+import { useShareCard } from '../composables/useShareCard.js'
+import { useFriendManager } from '../composables/useFriendManager.js'
+import { auth } from '../services/firebase.js'
 
 const router = useRouter()
 const stampManager = useStampManager()
+const shareCard = useShareCard()
+const friendManager = useFriendManager()
+
+const handleOpenCourseCert = (course) => {
+  if (!course) return
+  const courseCenters = filterCentersByRoute(course.tab)
+  const acquiredCenters = courseCenters.filter(c => c.isAcquired)
+  const stampUrls = acquiredCenters.map(c => getStampImageUrl(c, true, themeStore.currentTheme.main))
+
+  const riderName = auth?.currentUser?.displayName || '라이더'
+  const userCode = friendManager.currentUserCode.value || ''
+
+  shareCard.openForCourse(course, stampUrls, { riderName, userCode })
+}
+
+const handleOpenSingleStampCert = (center) => {
+  if (!center || !center.isAcquired) return
+  const stampUrl = getStampImageUrl(center, true, themeStore.currentTheme.main)
+  const riderName = auth?.currentUser?.displayName || '라이더'
+  const userCode = friendManager.currentUserCode.value || ''
+
+  shareCard.openForCourse({
+    tab: center.name,
+    distanceKm: 0,
+    elevationGainM: 0
+  }, [stampUrl], { riderName, userCode })
+  isDetailOpen.value = false
+}
 
 const {
   themeStore,
@@ -530,6 +580,34 @@ const goToMap = () => {
   font-weight: 700;
   padding: 4px 0;
   text-align: center;
+}
+
+.course-completed-action-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 2px;
+}
+
+.course-cert-card-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+
+.dialog-action-box {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.stamp-cert-card-btn {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
 }
 
 .remaining-centers-box {

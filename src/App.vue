@@ -14,6 +14,9 @@
     <main class="app-main">
       <router-view />
     </main>
+
+    <!-- 글로벌 완주 인증 포토 카드 모달 -->
+    <ShareCardModal />
     
     <!-- 하단 탭바: 배경 및 활성 색상이 테마와 일체화 -->
     <van-tabbar 
@@ -42,6 +45,7 @@ import { auth } from './services/firebase'
 import { useStampStore } from './stores/stamp'
 import { useThemeStore } from './stores/theme'
 import { useGpxStore } from './stores/gpx'
+import ShareCardModal from './components/ShareCardModal.vue'
 
 const active = ref(0)
 const stampStore = useStampStore()

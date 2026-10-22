@@ -8,7 +8,8 @@ import {
   getDocs,
   query,
   where,
-  limit
+  limit,
+  arrayUnion
 } from 'firebase/firestore'
 import { MAX_SHARED_TRACKS_QUERY_LIMIT } from '../constants/friend.js'
 import { db, auth } from '../services/firebase.js'
@@ -40,7 +41,8 @@ export function fromFirestoreTrack(data) {
   return {
     ...data,
     visibility: data.visibility === 'friends' ? 'friends' : 'private',
-    coordinates: (data.coordinates || []).map(c => Array.isArray(c) ? c : [c.lat, c.lng])
+    coordinates: (data.coordinates || []).map(c => Array.isArray(c) ? c : [c.lat, c.lng]),
+    isSynced: true
   }
 }
 
@@ -109,14 +111,24 @@ export const useGpxStore = defineStore('gpx', {
      */
     async syncTracksToFirestore() {
       const user = auth?.currentUser
-      if (!user || !db) return
+      if (!user || !db) return false
 
       try {
         const userDocRef = doc(db, 'users', user.uid)
         const firestoreTracks = this.tracks.map(toFirestoreTrack)
         await setDoc(userDocRef, { gpx_tracks: firestoreTracks }, { merge: true })
+
+        // 클라우드 저장 성공 시 모든 트랙을 isSynced = true로 확정 및 로컬 DB 반영
+        for (const t of this.tracks) {
+          if (!t.isSynced) {
+            t.isSynced = true
+            await saveTrackToDb(t)
+          }
+        }
+        return true
       } catch (cloudErr) {
         console.error('Firestore GPX 저장 실패:', cloudErr)
+        return false
       }
     },
 
@@ -142,38 +154,73 @@ export const useGpxStore = defineStore('gpx', {
             const userDocRef = doc(db, 'users', user.uid)
             const docSnap = await getDoc(userDocRef)
 
-            let remoteTracks = []
-            if (docSnap.exists() && docSnap.data().gpx_tracks) {
-              const rawRemote = docSnap.data().gpx_tracks || []
-              remoteTracks = rawRemote.map(fromFirestoreTrack)
-            }
+            if (docSnap.exists()) {
+              const userData = docSnap.data() || {}
+              const rawRemote = userData.gpx_tracks || []
+              const deletedTrackIds = new Set(userData.deleted_track_ids || [])
+              const remoteTracks = rawRemote.map(fromFirestoreTrack)
 
-            // 로컬과 리모트 양방향 병합 (id 기준, updatedAt 기준 최신 수정본 우선)
-            const trackMap = new Map()
-            remoteTracks.forEach(t => trackMap.set(t.id, t))
+              const remoteTrackMap = new Map()
+              remoteTracks.forEach(t => remoteTrackMap.set(t.id, t))
 
-            this.tracks.forEach(lTrack => {
-              if (!trackMap.has(lTrack.id)) {
-                trackMap.set(lTrack.id, lTrack)
-              } else {
-                // 이미 양쪽에 존재하는 경우 최신 수정본(updatedAt) 선택
-                const rTrack = trackMap.get(lTrack.id)
-                const lTime = new Date(lTrack.updatedAt || lTrack.createdAt || 0).getTime()
-                const rTime = new Date(rTrack.updatedAt || rTrack.createdAt || 0).getTime()
-                if (lTime > rTime) {
-                  trackMap.set(lTrack.id, lTrack)
+              const mergedMap = new Map()
+              const toDeleteFromDb = []
+
+              // 클라우드 목록 기준 초기화 (단, deletedTrackIds에 포함된 경우 제외)
+              remoteTracks.forEach(rTrack => {
+                if (!deletedTrackIds.has(rTrack.id)) {
+                  mergedMap.set(rTrack.id, rTrack)
+                }
+              })
+
+              // 로컬 트랙 정밀 비교 및 삭제 전파 처리
+              for (const lTrack of this.tracks) {
+                // (a) 다른 기기에서 삭제된 목록에 포함된 경우 -> 로컬 DB에서도 즉시 파기
+                if (deletedTrackIds.has(lTrack.id)) {
+                  toDeleteFromDb.push(lTrack.id)
+                  continue
+                }
+
+                // (b) 클라우드에도 존재하는 경우 -> 최신 수정본(updatedAt) 선택
+                if (remoteTrackMap.has(lTrack.id)) {
+                  const rTrack = remoteTrackMap.get(lTrack.id)
+                  const lTime = new Date(lTrack.updatedAt || lTrack.createdAt || 0).getTime()
+                  const rTime = new Date(rTrack.updatedAt || rTrack.createdAt || 0).getTime()
+                  if (lTime > rTime) {
+                    mergedMap.set(lTrack.id, { ...lTrack, isSynced: true })
+                  }
+                  continue
+                }
+
+                // (c) 로컬에는 있으나 클라우드에는 없는 경우:
+                // 이미 과거에 클라우드와 동기화되었던 트랙(isSynced === true)이거나 레거시 트랙:
+                // -> "다른 기기에서 삭제된 트랙"으로 판정하여 로컬 DB에서도 삭제!
+                if (lTrack.isSynced === true || lTrack.isSynced === undefined) {
+                  toDeleteFromDb.push(lTrack.id)
+                } else if (lTrack.isSynced === false) {
+                  // 오프라인에서 새로 생성되어 아직 동기화되지 않은 순수 신규 트랙 -> 보존 및 클라우드 업로드
+                  mergedMap.set(lTrack.id, lTrack)
                 }
               }
-            })
 
-            const mergedList = Array.from(trackMap.values())
-            mergedList.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-            this.tracks = mergedList
+              // 로컬 IndexedDB에서 삭제 대상 트랙 영구 제거
+              for (const delId of toDeleteFromDb) {
+                await deleteTrackFromDb(delId)
+              }
 
-            // Firestore와 IndexedDB 모두 최신 상태로 영구 갱신
-            await this.syncTracksToFirestore()
-            for (const t of mergedList) {
-              await saveTrackToDb(t)
+              const mergedList = Array.from(mergedMap.values())
+              mergedList.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+
+              this.tracks = mergedList.map(t => ({ ...t, isSynced: true }))
+
+              // Firestore와 IndexedDB 모두 최신 상태로 영구 갱신
+              await this.syncTracksToFirestore()
+              for (const t of this.tracks) {
+                await saveTrackToDb(t)
+              }
+            } else {
+              // 최초 사용자 (클라우드 문서 없음) -> 기존 로컬 트랙 일괄 최초 백업
+              await this.syncTracksToFirestore()
             }
           } catch (syncErr) {
             console.warn('Firestore GPX 동기화 실패 (오프라인 모드로 로컬 유지):', syncErr)
@@ -221,6 +268,7 @@ export const useGpxStore = defineStore('gpx', {
         coordinates: parsedData.coordinates,
         visible: true,
         visibility: 'private', // 기본값: 나만보기
+        isSynced: false, // 새로 등록된 트랙은 동기화 전까지 false
         createdAt: nowIso,
         updatedAt: nowIso
       }
@@ -314,18 +362,29 @@ export const useGpxStore = defineStore('gpx', {
       // 2. IndexedDB에서 삭제
       await deleteTrackFromDb(trackId)
 
-      // 3. Firestore에서도 동기화
-      await this.syncTracksToFirestore()
-
-      // 4. 공유된 트랙이었을 경우 shared_tracks에서도 동시 삭제
+      // 3. Firestore에서도 동기화 및 deleted_track_ids 기록 (다른 기기 삭제 전파용)
       const user = auth?.currentUser
       if (user && db) {
+        try {
+          const userDocRef = doc(db, 'users', user.uid)
+          const firestoreTracks = this.tracks.map(toFirestoreTrack)
+          await setDoc(userDocRef, {
+            gpx_tracks: firestoreTracks,
+            deleted_track_ids: arrayUnion(trackId)
+          }, { merge: true })
+        } catch (cloudErr) {
+          console.error('[GpxStore] Firestore 삭제 동기화 실패:', cloudErr)
+        }
+
+        // 4. 공유된 트랙이었을 경우 shared_tracks에서도 동시 삭제
         try {
           const sharedDocRef = doc(db, 'shared_tracks', trackId)
           await deleteDoc(sharedDocRef)
         } catch (err) {
           console.warn('[GpxStore] shared_tracks delete error:', err)
         }
+      } else {
+        await this.syncTracksToFirestore()
       }
 
       return true
@@ -461,10 +520,24 @@ export const useGpxStore = defineStore('gpx', {
       this.selectedTrackId = null
       this.hoveredTrackId = null
       this.selectedFriendTrackId = null
+      const allIds = this.tracks.map(t => t.id)
       this.hoveredFriendTrackId = null
       this.closeElevationProfile()
       await clearAllTracksFromDb()
-      await this.syncTracksToFirestore()
+      
+      const user = auth?.currentUser
+      if (user && db) {
+        try {
+          const userDocRef = doc(db, 'users', user.uid)
+          const updatePayload = { gpx_tracks: [] }
+          if (allIds.length > 0) {
+            updatePayload.deleted_track_ids = arrayUnion(...allIds)
+          }
+          await setDoc(userDocRef, updatePayload, { merge: true })
+        } catch (cloudErr) {
+          console.error('[GpxStore] Firestore 전체 삭제 동기화 실패:', cloudErr)
+        }
+      }
     },
 
     /**

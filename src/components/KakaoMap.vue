@@ -564,15 +564,20 @@ const initMap = () => {
 }
 /* GPX 고도 차트 실시간 스크러빙 마커 */
 :deep(.gpx-scrubbing-marker) {
+  position: relative;
+  width: 14px;
+  height: 14px;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   pointer-events: none;
-  transform: translate3d(0, -100%, 0);
-  transition: transform 0.04s ease-out;
 }
 
 :deep(.scrubbing-pin-badge) {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   background: rgba(15, 23, 42, 0.92);
   color: #38bdf8;
   font-size: 11px;
@@ -582,8 +587,8 @@ const initMap = () => {
   border-radius: 6px;
   border: 1px solid rgba(56, 189, 248, 0.4);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  margin-bottom: 3px;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 :deep(.scrubbing-pin-dot) {
@@ -593,5 +598,6 @@ const initMap = () => {
   border: 2.5px solid #ffffff;
   border-radius: 50%;
   box-shadow: 0 0 12px rgba(245, 158, 11, 0.85);
+  box-sizing: border-box;
 }
 </style>

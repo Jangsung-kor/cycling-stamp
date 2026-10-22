@@ -1,0 +1,176 @@
+/**
+ * Cycling Stamp PWA - 공통 UI 컴포넌트 스타일 (Design System)
+ * 아이콘 남발 금지 규칙을 준수한 미니멀 모던 스타일
+ */
+
+/* ==========================================================================
+   1. 통계 및 라벨 칩 (Chips & Badges)
+   ========================================================================== */
+
+.cycling-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-main, #334155);
+  font-variant-numeric: tabular-nums;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* 하이라이트 칩 (내 주행 핵심 수치) */
+.cycling-chip.highlight {
+  font-weight: 700;
+}
+
+/* 친구 공유 궤적 전용 칩 */
+.cycling-chip.friend {
+  background: var(--color-friend-bg);
+  color: var(--color-friend-text);
+  border-color: var(--color-friend-border);
+}
+
+/* 일시 표기용 차분한 칩 */
+.cycling-chip.date {
+  font-weight: 500;
+  color: var(--text-sub, #64748b);
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* 작은 크기 뱃지 (상태 표기 등) */
+.cycling-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-2xs);
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.cycling-badge.friend {
+  background: var(--color-friend-bg);
+  color: var(--color-friend-text);
+  border: 1px solid var(--color-friend-border);
+}
+
+/* ==========================================================================
+   2. 미니멀 플로팅 조작 버튼 (Floating Action Buttons)
+   ========================================================================== */
+
+.cycling-fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  color: #1e293b;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  user-select: none;
+}
+
+.cycling-fab:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.cycling-fab:active {
+  transform: translateY(0);
+}
+
+/* 다크 모드 플로팅 버튼 */
+.cycling-fab.is-dark {
+  background: rgba(30, 41, 59, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.cycling-fab.is-dark:hover {
+  background: rgba(45, 55, 72, 0.95);
+}
+
+/* ==========================================================================
+   3. 글래스모피즘 서피스 (Glass Surfaces)
+   ========================================================================== */
+
+.cycling-glass-card {
+  background: var(--glass-bg-dark);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border-dark);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glass-shadow);
+  color: #f1f5f9;
+}
+
+/* ==========================================================================
+   4. 은은한 서브 액션 버튼 (Subtle Action Buttons)
+   ========================================================================== */
+
+.cycling-btn-subtle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  color: var(--text-main, #334155);
+  background-color: var(--app-bg, #f1f5f9);
+  border: 1px solid var(--border-color, #cbd5e1);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.cycling-btn-subtle:hover {
+  border-color: var(--brand-color, #22c55e);
+  color: var(--brand-color, #22c55e);
+}
+
+.cycling-btn-subtle:active {
+  transform: scale(0.98);
+}
+
+/* 친구 궤적 액션 버튼 변형 */
+.cycling-btn-subtle.friend {
+  border-color: var(--color-friend-border);
+  color: var(--color-friend-text);
+  background-color: var(--color-friend-bg);
+}
+
+.cycling-btn-subtle.friend:hover {
+  background-color: rgba(6, 182, 212, 0.25);
+  border-color: var(--color-friend);
+}
+
+/* 다크 글래스 서피스 내부일 때 밝은 톤 유지 */
+.cycling-glass-card .cycling-btn-subtle {
+  color: #f1f5f9;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cycling-glass-card .cycling-btn-subtle:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}

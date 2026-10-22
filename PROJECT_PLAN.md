@@ -164,6 +164,35 @@
     *   **E2E 풀 파이프라인 검증**: 유저 코드 생성 $\rightarrow$ 친구 신청/수락 $\rightarrow$ GPX 업로드(private) $\rightarrow$ 친구 공개 전환(friends) $\rightarrow$ 친구 계정 공유 궤적 실시간 로드 $\rightarrow$ 개별 지도 표시 토글 $\rightarrow$ 비공개 복원 시 파기 $\rightarrow$ 친구 끊기까지 6개 시나리오 100% 통과.
     *   **프로덕션 빌드 & 회귀 검증**: 총 54개 자동화 단위/통합 테스트 100% 통과 및 `yarn build` 번들 무결성 확인.
 
+#### [Step 11] GPX 고도 프로필 차트 및 지도 실시간 스크러빙 (완료)
+- [x] **고도 프로필 샘플링 & 극값 산출 엔진 (`src/utils/gpxParser.js`)**: 120포인트 정밀 샘플링, `minElevationM`/`maxElevationM` 연산.
+- [x] **순수 SVG 반응형 차트 컴포넌트 (`src/components/ElevationChart.vue`)**: 외부 라이브러리 없이 60fps 즉각 렌더링, 정갈한 통계 지표.
+- [x] **카카오맵 실시간 스크러빙 동기화 (`src/composables/useKakaoGpxLayer.js`, `KakaoMap.vue`)**: 차트 호버 시 지도 위 앰버 핀 50ms 초저지연 연동.
+
+#### [Step 12] 미니멀 모던 공통 디자인 시스템 구축 및 핫픽스 (완료)
+- [x] **스크러빙 핀/차트 정합성 보정**: CustomOverlay 중심축 일치 및 SVG 축 오프셋 보정으로 거리 오차 100% 해결.
+- [x] **공통 스타일 모듈화 (`src/styles/`)**: `variables.css`, `typography.css`, `components.css` 토큰화 및 레거시 제거.
+
+#### [Step 13] 멀티 디바이스 GPX 삭제 동기화 및 좀비 복구 버그 해결 (완료)
+- [x] **라이프사이클 플래그 및 톰스톤 시스템 (`src/stores/gpx.js`)**: `isSynced` 플래그 및 Firestore `deleted_track_ids` 기반 타 기기 삭제 감지 및 로컬 DB 자동 영구 제거(Pruning).
+
+#### [Step 14] 완주 인증 포토 카드 내보내기 & 커뮤니티 바이럴 엔진 (완료)
+- [x] **Step 14-1: 100% 클라이언트 캔버스 렌더러 엔진 구축 (`src/utils/cardRenderer.js`, `tests/test_share_card.js`)**
+    *   인스타그램 스토리(9:16) 및 피드(1:1) 듀얼 해상도 렌더링.
+    *   GPX 위경도 Mercator 투영 및 자동 중앙 스케일링, 테마별(다크/잉크/사진) 배경 및 아날로그 틸트(-5도) 벡터 도장 합성.
+    *   Firebase Storage 0원(서버 미전송, 브라우저 인메모리 Blob/Canvas 즉시 합성 처리).
+- [x] **Step 14-2: 포토 카드 파사드 컴포저블 구현 (`src/composables/useShareCard.js`)**
+    *   트랙/코스 모달 제어, Web Share API(`navigator.share`) 및 PNG 다운로드 폴백 연동.
+- [x] **Step 14-3: 미니멀 모던 포토 카드 모달 컴포넌트 구축 (`src/components/ShareCardModal.vue`)**
+    *   라이브 캔버스 프리뷰, 비율/테마 토글, 사진 첨부/제거, 공통 디자인 시스템 토큰 적용.
+    *   아이콘 남발 금지 규칙을 엄격히 준수한 프리미엄 미니멀 타이포그래피.
+- [x] **Step 14-4: 사용자 진입점 연동 (`App.vue`, `GpxDrawer.vue`, `StampView.vue`)**
+    *   `App.vue`: 글로벌 단일 인스턴스 모달 배치.
+    *   `GpxDrawer.vue`: 내 주행 및 친구 주행 트랙 카드 통계 행에 `[인증 카드]` 버튼 배치.
+    *   `StampView.vue`: 코스 완주 시 펼침 영역에 `[완주 인증 카드 내보내기]` 및 도장 상세 팝업에 `[인증 카드 내보내기]` 연동.
+- [x] **Step 14-5: 단위/통합 테스트 및 프로덕션 빌드 검증 (`yarn test`, `yarn build`)**
+    *   11개 단위 테스트 추가, 총 12개 스위트 82개 테스트 100% 통과 및 프로덕션 빌드 무결성 확인.
+
 ---
 
 ## 6. 다음 세션을 위한 인수인계 노트 (Handover Notes)
@@ -212,11 +241,38 @@
         - 기존 친구 트랙 카드 내 장식용 이모지(`🚴`, `⛰️`, `⏱️`, `📅`)를 전면 정리하여 일관된 미니멀 모던 디자인 확립.
       - **테스트 및 빌드 검증 (`tests/test_elevation_profile.js`)**:
         - 고도 프로필 차트 7개 단위 테스트 추가, 총 10개 스위트 71개 테스트 100% 통과 및 프로덕션 빌드(`yarn build`) 검증 완료.
-*   **다음 세션 로드맵 (우선순위 후보)**:
-    1. **[후보 2] 라이더 숙소 꿀팁 메모 및 자전거 실내 보관 태깅**:
-       - 숙소 인포윈도우에 자전거 실내 반입 가능 여부 태그 및 라이더 후기 메모 기록/영속 저장.
-    2. **[후보 3] '스탬프 + GPX 주행 궤적' 완주 인증 포토 카드 내보내기**:
-       - 획득 도장과 GPX 주행선, 주행 통계를 합성한 소셜 공유용 이미지 생성.
+      - **Step 12: 고도 차트-지도 정합성 핫픽스 및 공통 디자인 시스템 구축 완료**:
+        - **스크러빙 핀 정합성 100% 보정**: Kakao CustomOverlay의 `yAnchor: 1.0`과 CSS `transform: translateY(-100%)` 중복 적용으로 인한 40px 공중 부양 버그 제거. 14×14px 점 중심을 `xAnchor: 0.5, yAnchor: 0.5`로 완벽 일치시키고 고도 뱃지는 상단 플로팅(`bottom: 20px`) 처리.
+        - **차트 스크러빙 거리 비율 보정**: SVG 좌측 축 라벨 영역(`padLeft = 40px`)을 고려하여 마우스 X 좌표를 `(svgX - padLeft) / plotW` 구간으로 정밀 매핑하여 마우스 커서와 지도 핀 간의 거리 오차(~6.7%) 원천 해결.
+        - **미니멀 모던 공통 디자인 시스템 구축 (`src/styles/`)**:
+          - 레거시 미사용 `src/style.css` 제거.
+          - `variables.css`(디자인 토큰), `typography.css`(`.tabular-nums`, 단일행 말줄임), `components.css`(`.cycling-chip`, `.cycling-badge`, `.cycling-fab`, `.cycling-glass-card`, `.cycling-btn-subtle`) 모듈화 구축.
+          - `main.js` 글로벌 임포트 및 `ElevationChart.vue`, `GpxDrawer.vue` 공통 클래스 연동.
+          - 테마 변경 시에도 버튼/텍스트 가독성이 100% 유지되도록 `AGENTS.md` 및 규칙 파일에 '공통 스타일 우선 원칙 (Common Style First)' 등록.
+      - **Step 13: 멀티 디바이스 GPX 삭제 동기화 및 좀비 복구 버그 해결 완료**:
+        - **문제 원인**: A 기기에서 트랙 삭제 후 B 기기 접속 시, B 기기의 IndexedDB에 남아있던 트랙을 '신규 오프라인 트랙'으로 착각하여 Firestore로 역동기화(부활)하는 현상 발생.
+        - **해결 방안 (방안 1 채택)**:
+          - 클라우드 동기화 라이프사이클 플래그 `isSynced: boolean` 도입 (업로드 완료 및 서버 다운로드 트랙에 `true` 부여).
+          - Firestore `users/{uid}` 문서에 `deleted_track_ids` 톰스톤 배열 필드 관리 (`arrayUnion` 원자적 추가).
+          - `removeTrack` 및 `clearAllTracks` 시 로컬 상태/IndexedDB 정리와 함께 Firestore `deleted_track_ids` 및 `shared_tracks` 정리 일괄 수행.
+          - `loadTracks` 시 Firestore에 없거나 `deleted_track_ids`에 포함된 동기화 트랙(`isSynced: true`)은 다른 기기에서 삭제된 것으로 판별하여 로컬 IndexedDB에서도 자동 영구 제거(Pruning). 순수 오프라인 신규 트랙(`isSynced === false`)만 보존하여 Firestore로 안전 업로드.
+        - **테스트 및 검증 (`tests/test_gpx_sync_deletion.js`)**:
+          - 4개 핵심 시나리오(신규/원격 `isSynced` 식별, 원격 삭제 감지 및 로컬 자동 정리, 오프라인 트랙 보존, 트랙 삭제 시 스토어/IndexedDB/Firestore 톰스톤 기록) 단위 테스트 완비.
+          - 총 11개 스위트 75개 테스트 100% 통과 및 프로덕션 빌드(`yarn build`) 검증 완료.
+      - **Step 14: 완주 인증 포토 카드 내보내기 & 커뮤니티 바이럴 엔진 구축 완료**:
+        - **100% 브라우저 클라이언트 렌더러 (`src/utils/cardRenderer.js`)**: 인스타그램 스토리(9:16) 및 피드(1:1) 규격 지원, GPX 좌표 종횡비 보존(Mercator) 투영, 미니멀 다크/스탬프 잉크/내 사진 배경 3종 테마 및 아날로그 틸트(-5도) 벡터 도장 합성. Firebase Storage 0원(서버 미전송, 인메모리 Blob 처리).
+        - **도메인 파사드 (`src/composables/useShareCard.js`)**: Web Share API(`navigator.share`) 1-Tap 인스타그램/카카오톡 공유 및 PNG 다운로드 자동 폴백 연동.
+        - **모던 미니멀 UI 모달 (`src/components/ShareCardModal.vue`)**: 라이브 프리뷰, 비율/테마 선택, 공통 스타일 토큰 적용, 아이콘 남발 배제.
+        - **사용자 진입점 연동**: `App.vue`(글로벌 모달), `GpxDrawer.vue`(내 주행 및 친구 주행 트랙 카드 `[인증 카드]`), `StampView.vue`(코스 완주 영역 및 개별 도장 팝업 `[인증 카드 내보내기]`).
+        - **테스트 및 검증 (`tests/test_share_card.js`)**: 11개 단위 테스트 완비, 총 12개 스위트 82개 자동화 테스트 100% 통과 및 프로덕션 빌드(`yarn build`) 완료.
+
+*   **다음 세션 로드맵 (후속 백로그 후보)**:
+    1. **[후보 1] 라이더 숙소 꿀팁 메모 및 자전거 실내 보관 태깅 (Step 15)**:
+       - 라이더 핵심 관심사인 숙소별 '자전거 객실/실내 보관 가능 여부' 태깅 및 후기/메모 집단지성 DB 구축 (Firestore 연동).
+    2. **[후보 2] 친구 라이딩 소셜 피드 & 응원하기 (Social Riding Feed)**:
+       - 맞팔된 친구들의 최근 완주 기록과 인증 카드를 모아보는 피드 타임라인 및 원터치 응원(좋아요/박수) 인터랙션.
+    3. **[후보 3] 기존 뷰 공통 스타일 리팩토링 (`src/styles/` 확대 적용)**:
+       - `StampView.vue`, `ProfileView.vue`, `FriendModal.vue` 등 기존 화면의 스타일 일관성 정돈.
 
 *   **주의사항**:
     - 기존 퍼사드 패턴(`useStampManager`, `useGpxManager`, `useFriendManager`) 아키텍처 규칙을 엄격히 준수할 것.

@@ -1,0 +1,45 @@
+/**
+ * Cycling Stamp PWA - 타이포그래피 및 텍스트 유틸리티
+ */
+
+/* 거리, 고도, 시간, 좌표 등 동적 수치 표기 시 자간 흔들림 방지 */
+.tabular-nums,
+[data-tabular="true"] {
+  font-variant-numeric: tabular-nums;
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
+}
+
+/* 단일행 말줄임 유틸리티 */
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 모바일 터치 최적화 텍스트 드래그 방지 */
+.user-select-none {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 정갈한 소제목 라벨 (아이콘 배제) */
+.section-caption {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--text-sub, #64748b);
+  letter-spacing: -0.2px;
+}
+
+/* 글로벌 테마 연동 텍스트 유틸리티 */
+.text-main {
+  color: var(--text-main, #0f172a) !important;
+}
+
+.text-sub {
+  color: var(--text-sub, #64748b) !important;
+}
+
+.text-brand {
+  color: var(--brand-color, #22c55e) !important;
+}

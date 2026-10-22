@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showElevationProfile && activeElevationTrack" class="elevation-chart-card">
+  <div v-if="showElevationProfile && activeElevationTrack" class="elevation-chart-card cycling-glass-card">
     <!-- 상단 헤더: 트랙명 및 고도 요약 지표 (시각적 잡음 없는 정갈한 텍스트 기반) -->
     <div class="chart-header">
       <div class="header-left">
@@ -7,10 +7,10 @@
           class="track-indicator-dot" 
           :style="{ backgroundColor: isFriendTrack ? '#06b6d4' : themeStore.currentTheme.main }"
         ></span>
-        <span class="track-name" :title="activeElevationTrack.title">
+        <span class="track-name text-truncate" :title="activeElevationTrack.title">
           {{ activeElevationTrack.title }}
         </span>
-        <span v-if="isFriendTrack" class="friend-badge">
+        <span v-if="isFriendTrack" class="friend-badge cycling-badge friend">
           {{ activeElevationTrack.authorName || '친구' }}
         </span>
       </div>
@@ -357,10 +357,14 @@ const updateScrubFromClientX = (clientX) => {
   const rect = containerRef.value.getBoundingClientRect()
   if (rect.width <= 0) return
 
-  // 컨테이너 내 X 비율 (0.0 ~ 1.0)
+  // 컨테이너 내 X 비율 (0.0 ~ 1.0) -> SVG viewBox(600) 기준 좌표 변환
   const relX = (clientX - rect.left) / rect.width
-  const clampedX = Math.max(0, Math.min(1, relX))
-  const targetDistKm = clampedX * stats.value.distanceKm
+  const svgX = relX * 600
+
+  // 차트 실제 플롯 영역(padLeft ~ padLeft + plotW) 기준으로 거리 정규화
+  const plotRatio = (svgX - padLeft) / plotW
+  const clampedRatio = Math.max(0, Math.min(1, plotRatio))
+  const targetDistKm = clampedRatio * stats.value.distanceKm
 
   // 가장 가까운 샘플 포인트 탐색
   const pts = svgPoints.value

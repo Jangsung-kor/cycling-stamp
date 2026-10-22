@@ -11,7 +11,7 @@ import Vant from 'vant'
 import 'vant/lib/index.css'
 
 // 글로벌 스타일 (style.css가 있다면 유지, 없다면 제외)
-// import './style.css'
+import './styles/main.css'
 
 const app = createApp(App)
 

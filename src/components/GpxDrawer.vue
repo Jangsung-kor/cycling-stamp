@@ -179,25 +179,33 @@
 
                 <!-- 2행: 주행 통계 정보 칩 -->
                 <div class="card-stats-row">
-                  <span class="stat-chip highlight" :style="{ color: themeStore.currentTheme.main, backgroundColor: `${themeStore.currentTheme.main}12` }">
+                  <span class="stat-chip cycling-chip highlight" :style="{ color: themeStore.currentTheme.main, backgroundColor: `${themeStore.currentTheme.main}12` }">
                     {{ track.distanceKm }} km
                   </span>
-                  <span v-if="track.elevationGainM > 0" class="stat-chip">
+                  <span v-if="track.elevationGainM > 0" class="stat-chip cycling-chip">
                     {{ track.elevationGainM }} m
                   </span>
-                  <span v-if="track.durationMinutes > 0" class="stat-chip">
+                  <span v-if="track.durationMinutes > 0" class="stat-chip cycling-chip">
                     {{ formatDuration(track.durationMinutes) }}
                   </span>
-                  <span class="stat-chip date-chip">
+                  <span class="stat-chip cycling-chip date">
                     {{ formatDate(track.startTime || track.createdAt) }}
                   </span>
                   <button
                     type="button"
-                    class="elevation-btn"
+                    class="elevation-btn cycling-btn-subtle"
                     @click.stop="handleOpenElevation(track)"
                     title="고도 프로필 차트 보기"
                   >
                     고도 차트
+                  </button>
+                  <button
+                    type="button"
+                    class="share-card-btn cycling-btn-subtle"
+                    @click.stop="handleOpenShareCard(track, false)"
+                    title="완주 인증 포토 카드 내보내기"
+                  >
+                    인증 카드
                   </button>
                 </div>
               </div>
@@ -293,25 +301,33 @@
 
               <!-- 3행: 주행 통계 정보 칩 -->
               <div class="card-stats-row">
-                <span class="stat-chip highlight friend-chip">
+                <span class="stat-chip cycling-chip friend">
                   {{ fTrack.distanceKm }} km
                 </span>
-                <span v-if="fTrack.elevationGainM > 0" class="stat-chip">
+                <span v-if="fTrack.elevationGainM > 0" class="stat-chip cycling-chip friend">
                   {{ fTrack.elevationGainM }} m
                 </span>
-                <span v-if="fTrack.durationMinutes > 0" class="stat-chip">
+                <span v-if="fTrack.durationMinutes > 0" class="stat-chip cycling-chip friend">
                   {{ formatDuration(fTrack.durationMinutes) }}
                 </span>
-                <span v-if="fTrack.date || fTrack.startTime || fTrack.createdAt" class="stat-chip date-chip">
+                <span v-if="fTrack.date || fTrack.startTime || fTrack.createdAt" class="stat-chip cycling-chip date">
                   {{ formatDate(fTrack.date || fTrack.startTime || fTrack.createdAt) }}
                 </span>
                 <button
                   type="button"
-                  class="elevation-btn friend"
+                  class="elevation-btn cycling-btn-subtle friend"
                   @click.stop="handleOpenElevation(fTrack)"
                   title="고도 프로필 차트 보기"
                 >
                   고도 차트
+                </button>
+                <button
+                  type="button"
+                  class="share-card-btn cycling-btn-subtle friend"
+                  @click.stop="handleOpenShareCard(fTrack, true)"
+                  title="완주 인증 포토 카드 내보내기"
+                >
+                  인증 카드
                 </button>
               </div>
             </div>
@@ -341,6 +357,8 @@
 import { ref, watch, nextTick } from 'vue'
 import { useGpxManager } from '../composables/useGpxManager.js'
 import { useFriendManager } from '../composables/useFriendManager.js'
+import { useShareCard } from '../composables/useShareCard.js'
+import { auth } from '../services/firebase.js'
 
 const props = defineProps({
   show: {
@@ -387,6 +405,21 @@ const {
 
 const handleOpenElevation = (track) => {
   openElevationProfile(track.id)
+  emit('update:show', false)
+}
+
+// 완주 인증 포토 카드 파사드
+const shareCard = useShareCard()
+
+const handleOpenShareCard = (track, isFriend = false) => {
+  const riderName = isFriend
+    ? (track.authorName || '친구')
+    : (auth?.currentUser?.displayName || '라이더')
+  const userCode = isFriend
+    ? (track.authorCode || '')
+    : (friendManager.currentUserCode.value || '')
+
+  shareCard.openForTrack(track, { riderName, userCode })
   emit('update:show', false)
 }
 
@@ -984,30 +1017,9 @@ const cancelEditTitle = () => {
 }
 .elevation-btn {
   margin-left: auto;
-  padding: 3px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
-  color: #e2e8f0;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
 }
 
-.elevation-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
-}
-
-.elevation-btn.friend {
-  border-color: rgba(6, 182, 212, 0.3);
-  color: #38bdf8;
-  background: rgba(6, 182, 212, 0.1);
-}
-
-.elevation-btn.friend:hover {
-  background: rgba(6, 182, 212, 0.2);
+.share-card-btn {
+  margin-left: 4px;
 }
 </style>

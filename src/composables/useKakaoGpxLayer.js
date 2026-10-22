@@ -72,7 +72,8 @@ export function useKakaoGpxLayer(getMapInstance, themeStore, gpxStore) {
         map,
         position: pos,
         content: el,
-        yAnchor: 1.0,
+        xAnchor: 0.5,
+        yAnchor: 0.5,
         zIndex: 50
       })
     } else {
