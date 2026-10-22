@@ -88,11 +88,13 @@
 
           <!-- 2-3. 내 사진 업로드 / 변경 컨트롤 (사진 테마 활성 시) -->
           <div v-if="selectedTheme === 'photo'" class="photo-upload-group">
+            <!-- 앨범/갤러리 선택용 input (모바일 OS의 갤러리/카메라 통합 미디어 피커 호출) -->
             <input 
               type="file" 
-              ref="photoInputRef" 
-              accept="image/*" 
+              ref="galleryInputRef" 
+              accept="image/png, image/jpeg, image/jpg, image/webp, image/heic, .png, .jpg, .jpeg, .webp, .heic" 
               class="hidden-file-input" 
+              @click="e => { e.target.value = '' }"
               @change="handlePhotoSelect" 
             />
             
@@ -100,7 +102,8 @@
               <button 
                 type="button" 
                 class="photo-action-btn cycling-btn-subtle"
-                @click="photoInputRef?.click()"
+                @click="openGalleryPicker"
+                title="스마트폰 앨범/갤러리에서 사진 선택"
               >
                 {{ userPhotoUrl ? '사진 변경' : '라이딩 사진 선택' }}
               </button>
@@ -167,7 +170,7 @@ const {
 } = useShareCard()
 
 const canvasRef = ref(null)
-const photoInputRef = ref(null)
+const galleryInputRef = ref(null)
 
 // 팝업 표시 상태 핸들러
 const handlePopupShowChange = (val) => {
@@ -197,11 +200,17 @@ const changeRatio = (ratio) => {
   requestRender()
 }
 
+// 앨범/갤러리 피커 열기
+const openGalleryPicker = () => {
+  galleryInputRef.value?.click()
+}
+
 // 테마 변경
-const changeTheme = (themeId) => {
+const changeTheme = async (themeId) => {
   selectedTheme.value = themeId
   if (themeId === 'photo' && !userPhotoUrl.value) {
-    photoInputRef.value?.click()
+    await nextTick()
+    openGalleryPicker()
   }
   requestRender()
 }
@@ -396,16 +405,19 @@ const handleShare = () => {
 
 .photo-btn-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .photo-action-btn {
-  flex: 1;
-  padding: 8px 12px;
+  flex: 1 1 0;
+  min-width: 85px;
+  padding: 8px 8px;
   border-radius: 8px;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .photo-action-btn.delete {
