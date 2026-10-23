@@ -8,30 +8,59 @@ export const CARD_DIMENSIONS = {
   square: { width: 1080, height: 1080, label: '1:1 피드' }
 }
 
+export const SIMPLE_SUB_COLORS = {
+  black: {
+    id: 'black',
+    name: '블랙',
+    bgStart: '#0f172a',
+    bgEnd: '#020617',
+    cardBorder: 'rgba(255, 255, 255, 0.12)',
+    badgeBg: 'rgba(255, 255, 255, 0.08)',
+    textMain: '#ffffff',
+    textSub: '#94a3b8',
+    trackDefaultColor: '#38bdf8'
+  },
+  navy: {
+    id: 'navy',
+    name: '네이비',
+    bgStart: '#0f1d38',
+    bgEnd: '#080d1a',
+    cardBorder: 'rgba(147, 197, 253, 0.18)',
+    badgeBg: 'rgba(147, 197, 253, 0.08)',
+    textMain: '#ffffff',
+    textSub: '#93c5fd',
+    trackDefaultColor: '#60a5fa'
+  }
+}
+
 export const CARD_THEMES = {
   dark: {
     id: 'dark',
-    name: '미니멀 다크',
+    name: '심플',
     bgStart: '#0f172a',
     bgEnd: '#020617',
     textMain: '#ffffff',
     textSub: '#94a3b8',
-    cardBorder: 'rgba(255, 255, 255, 0.1)',
+    cardBorder: 'rgba(255, 255, 255, 0.12)',
     badgeBg: 'rgba(255, 255, 255, 0.08)',
     statBg: 'rgba(15, 23, 42, 0.65)',
-    trackDefaultColor: '#06b6d4'
+    trackDefaultColor: '#38bdf8'
   },
   ink: {
     id: 'ink',
-    name: '스탬프 잉크',
-    bgStart: '#faf8f5',
-    bgEnd: '#ede5d8',
-    textMain: '#1e293b',
-    textSub: '#64748b',
-    cardBorder: 'rgba(0, 0, 0, 0.08)',
-    badgeBg: 'rgba(0, 0, 0, 0.04)',
-    statBg: 'rgba(255, 255, 255, 0.75)',
-    trackDefaultColor: '#b84a48'
+    name: '아날로그 수첩',
+    bgStart: '#fbf9f4',
+    bgEnd: '#e6d8c3',
+    textMain: '#2c221e',
+    textSub: '#7c6e65',
+    cardBorder: 'rgba(184, 74, 72, 0.28)',
+    badgeBg: 'rgba(184, 74, 72, 0.08)',
+    statBg: 'rgba(255, 252, 248, 0.92)',
+    trackDefaultColor: '#b84a48',
+    outerBorder: 'rgba(184, 74, 72, 0.35)',
+    innerBorder: 'rgba(184, 74, 72, 0.18)',
+    gridColor: 'rgba(124, 110, 101, 0.04)',
+    sealColor: 'rgba(184, 74, 72, 0.09)'
   },
   photo: {
     id: 'photo',
@@ -188,6 +217,144 @@ function drawImageCover(ctx, img, x, y, w, h) {
 }
 
 /**
+ * 아날로그 수첩 테마 전용: 여권 종이 질감 & 비네팅 렌더링
+ */
+function drawInkPaperBackground(ctx, width, height, themeCfg) {
+  // 1. 방사형 웜톤 비네팅 그라디언트 (중앙 밝은 한지 크림 -> 외곽 오래된 수첩 음영)
+  const radialGrad = ctx.createRadialGradient(
+    width / 2,
+    height * 0.42,
+    width * 0.1,
+    width / 2,
+    height / 2,
+    Math.max(width, height) * 0.75
+  )
+  radialGrad.addColorStop(0, '#fdfbf7')
+  radialGrad.addColorStop(0.5, '#f5ebe0')
+  radialGrad.addColorStop(1, '#e3d4be')
+
+  ctx.fillStyle = radialGrad
+  ctx.fillRect(0, 0, width, height)
+
+  // 2. 클래식 여권 모눈 그리드 텍스처 (미세하고 정갈한 격자)
+  ctx.save()
+  ctx.strokeStyle = themeCfg.gridColor || 'rgba(124, 110, 101, 0.04)'
+  ctx.lineWidth = 1
+  const step = 40
+  ctx.beginPath()
+  for (let x = step; x < width; x += step) {
+    ctx.moveTo(x, 0)
+    ctx.lineTo(x, height)
+  }
+  for (let y = step; y < height; y += step) {
+    ctx.moveTo(0, y)
+    ctx.lineTo(width, y)
+  }
+  ctx.stroke()
+  ctx.restore()
+}
+
+/**
+ * 아날로그 수첩 테마 전용: 공식 여권 이중 테두리 & 모서리 장식 브래킷
+ */
+function drawPassportDoubleBorder(ctx, width, height, themeCfg) {
+  ctx.save()
+  const outerMargin = 38
+  const innerMargin = 48
+  const outerW = width - outerMargin * 2
+  const outerH = height - outerMargin * 2
+  const innerW = width - innerMargin * 2
+  const innerH = height - innerMargin * 2
+
+  // 1. 외곽 굵은 프레임 (인주빛 앤틱 브라운)
+  ctx.strokeStyle = themeCfg.outerBorder || 'rgba(184, 74, 72, 0.35)'
+  ctx.lineWidth = 2.5
+  ctx.strokeRect(outerMargin, outerMargin, outerW, outerH)
+
+  // 2. 내측 미세 테두리선
+  ctx.strokeStyle = themeCfg.innerBorder || 'rgba(184, 74, 72, 0.18)'
+  ctx.lineWidth = 1
+  ctx.strokeRect(innerMargin, innerMargin, innerW, innerH)
+
+  // 3. 4개 모서리 클래식 브래킷(L자 코너) 장식
+  const cornerLen = 22
+  const cornerPad = 58
+  ctx.strokeStyle = themeCfg.outerBorder || 'rgba(184, 74, 72, 0.4)'
+  ctx.lineWidth = 2
+
+  ctx.beginPath()
+  // 좌상단
+  ctx.moveTo(cornerPad, cornerPad + cornerLen)
+  ctx.lineTo(cornerPad, cornerPad)
+  ctx.lineTo(cornerPad + cornerLen, cornerPad)
+
+  // 우상단
+  ctx.moveTo(width - cornerPad - cornerLen, cornerPad)
+  ctx.lineTo(width - cornerPad, cornerPad)
+  ctx.lineTo(width - cornerPad, cornerPad + cornerLen)
+
+  // 좌하단
+  ctx.moveTo(cornerPad, height - cornerPad - cornerLen)
+  ctx.lineTo(cornerPad, height - cornerPad)
+  ctx.lineTo(cornerPad + cornerLen, height - cornerPad)
+
+  // 우하단
+  ctx.moveTo(width - cornerPad - cornerLen, height - cornerPad)
+  ctx.lineTo(width - cornerPad, height - cornerPad)
+  ctx.lineTo(width - cornerPad, height - cornerPad - cornerLen)
+  ctx.stroke()
+
+  ctx.restore()
+}
+
+/**
+ * 아날로그 수첩 테마 전용: 공식 인증 원형 인주 날인 씰 워터마크
+ */
+function drawOfficialSealWatermark(ctx, cx, cy, radius) {
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.rotate((-12 * Math.PI) / 180) // 수작업 스탬프 특유의 자연스러운 틸트
+
+  const sealColor = 'rgba(184, 74, 72, 0.08)'
+  ctx.strokeStyle = sealColor
+  ctx.fillStyle = sealColor
+
+  // 외곽 이중 원
+  ctx.lineWidth = 3
+  ctx.beginPath()
+  ctx.arc(0, 0, radius, 0, Math.PI * 2)
+  ctx.stroke()
+
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.arc(0, 0, radius - 12, 0, Math.PI * 2)
+  ctx.stroke()
+
+  // 내부 점선 링
+  ctx.save()
+  ctx.setLineDash([4, 6])
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.arc(0, 0, radius - 24, 0, Math.PI * 2)
+  ctx.stroke()
+  ctx.restore()
+
+  // 중앙 텍스트 엠블럼
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.font = '900 24px "Apple SD Gothic Neo", "Pretendard", sans-serif'
+  ctx.fillText('국토종주 완주 인증', 0, -28)
+
+  ctx.font = '800 18px "Pretendard", sans-serif'
+  ctx.fillText('OFFICIAL SEAL', 0, 0)
+
+  ctx.font = '700 15px "Pretendard", sans-serif'
+  ctx.fillText('KOREA CYCLING PATHS', 0, 26)
+
+  ctx.restore()
+}
+
+/**
  * 브라우저 캔버스에 고해상도 인증 카드 렌더링
  * @param {HTMLCanvasElement} canvas
  * @param {Object} options
@@ -196,6 +363,7 @@ export async function renderCertificationCard(canvas, options = {}) {
   const {
     aspectRatio = 'story',
     theme = 'dark',
+    simpleColor = 'black',
     trackTitle = '국토종주 라이딩',
     courseName = '',
     distanceKm = 0,
@@ -211,7 +379,10 @@ export async function renderCertificationCard(canvas, options = {}) {
   } = options
 
   const dim = CARD_DIMENSIONS[aspectRatio] || CARD_DIMENSIONS.story
-  const themeCfg = CARD_THEMES[theme] || CARD_THEMES.dark
+  let themeCfg = CARD_THEMES[theme] || CARD_THEMES.dark
+  if (theme === 'dark' && SIMPLE_SUB_COLORS[simpleColor]) {
+    themeCfg = { ...themeCfg, ...SIMPLE_SUB_COLORS[simpleColor] }
+  }
   const mainAccent = accentColor || themeCfg.trackDefaultColor
 
   canvas.width = dim.width
@@ -229,8 +400,11 @@ export async function renderCertificationCard(canvas, options = {}) {
     overlayGrad.addColorStop(1, 'rgba(0, 0, 0, 0.92)')
     ctx.fillStyle = overlayGrad
     ctx.fillRect(0, 0, dim.width, dim.height)
+  } else if (theme === 'ink') {
+    // 아날로그 수첩: 여권 종이 질감 & 웜톤 비네팅
+    drawInkPaperBackground(ctx, dim.width, dim.height, themeCfg)
   } else {
-    // 다크 / 잉크 그라디언트 배경
+    // 다크 그라디언트 배경 (심플 블랙 / 네이비)
     const bgGrad = ctx.createLinearGradient(0, 0, 0, dim.height)
     bgGrad.addColorStop(0, themeCfg.bgStart)
     bgGrad.addColorStop(1, themeCfg.bgEnd)
@@ -238,10 +412,20 @@ export async function renderCertificationCard(canvas, options = {}) {
     ctx.fillRect(0, 0, dim.width, dim.height)
   }
 
-  // 2. 외곽 미니멀 프레임 테두리
-  ctx.strokeStyle = themeCfg.cardBorder
-  ctx.lineWidth = 2
-  ctx.strokeRect(40, 40, dim.width - 80, dim.height - 80)
+  // 2. 외곽 프레임 테두리
+  if (theme === 'ink') {
+    // 공식 여권 이중 테두리 & 앤틱 코너 브래킷
+    drawPassportDoubleBorder(ctx, dim.width, dim.height, themeCfg)
+  } else if (theme === 'dark') {
+    // 심플 테마: 1px 미니멀 헤어라인 정밀 프레임
+    ctx.strokeStyle = themeCfg.cardBorder
+    ctx.lineWidth = 1
+    ctx.strokeRect(40, 40, dim.width - 80, dim.height - 80)
+  } else {
+    ctx.strokeStyle = themeCfg.cardBorder
+    ctx.lineWidth = 2
+    ctx.strokeRect(40, 40, dim.width - 80, dim.height - 80)
+  }
 
   // 3. 헤더 영역 (로고 & 서브타이틀)
   const headerY = 120
@@ -302,31 +486,70 @@ export async function renderCertificationCard(canvas, options = {}) {
     statsY = visualRect.y + visualRect.height + 40
   }
 
+  // 5-0. 아날로그 수첩 테마: 배경 공식 인증 원형 씰 워터마크 날인
+  if (theme === 'ink') {
+    const sealCx = visualRect.x + visualRect.width * 0.5
+    const sealCy = visualRect.y + visualRect.height * 0.48
+    const sealR = Math.min(visualRect.width, visualRect.height) * 0.36
+    drawOfficialSealWatermark(ctx, sealCx, sealCy, sealR)
+  }
+
   // 5-1. GPX 궤적 렌더링
   if (coordinates && coordinates.length > 1) {
     const pts = projectCoordinatesToCanvas(coordinates, visualRect)
 
     if (pts.length > 1) {
-      // 궤적 글로우 배경선
-      ctx.save()
-      ctx.shadowColor = mainAccent
-      ctx.shadowBlur = theme === 'ink' ? 0 : 20
-      ctx.strokeStyle = mainAccent
-      ctx.lineWidth = 6
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
+      if (theme === 'ink') {
+        // 인주 잉크 번짐 효과 (2-pass stroke: 스밈 외곽선 + 선명한 코어 잉크선)
+        ctx.save()
+        ctx.strokeStyle = 'rgba(184, 74, 72, 0.20)'
+        ctx.lineWidth = 12
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.beginPath()
+        ctx.moveTo(pts[0].x, pts[0].y)
+        for (let i = 1; i < pts.length; i++) {
+          ctx.lineTo(pts[i].x, pts[i].y)
+        }
+        ctx.stroke()
+        ctx.restore()
 
-      ctx.beginPath()
-      ctx.moveTo(pts[0].x, pts[0].y)
-      for (let i = 1; i < pts.length; i++) {
-        ctx.lineTo(pts[i].x, pts[i].y)
+        ctx.save()
+        ctx.strokeStyle = mainAccent
+        ctx.lineWidth = 5
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.beginPath()
+        ctx.moveTo(pts[0].x, pts[0].y)
+        for (let i = 1; i < pts.length; i++) {
+          ctx.lineTo(pts[i].x, pts[i].y)
+        }
+        ctx.stroke()
+        ctx.restore()
+      } else {
+        // 기존 다크 / 포토 궤적 렌더링
+        ctx.save()
+        ctx.shadowColor = mainAccent
+        ctx.shadowBlur = 20
+        ctx.strokeStyle = mainAccent
+        ctx.lineWidth = 6
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+
+        ctx.beginPath()
+        ctx.moveTo(pts[0].x, pts[0].y)
+        for (let i = 1; i < pts.length; i++) {
+          ctx.lineTo(pts[i].x, pts[i].y)
+        }
+        ctx.stroke()
+        ctx.restore()
       }
-      ctx.stroke()
 
       // 시작점 및 도착점 핀 포인트
+      ctx.save()
       ctx.shadowBlur = 0
       // 출발점: 앰버/화이트
-      ctx.fillStyle = '#ffffff'
+      ctx.fillStyle = theme === 'ink' ? '#fdfbf7' : '#ffffff'
       ctx.beginPath()
       ctx.arc(pts[0].x, pts[0].y, 8, 0, Math.PI * 2)
       ctx.fill()
@@ -339,7 +562,7 @@ export async function renderCertificationCard(canvas, options = {}) {
       ctx.beginPath()
       ctx.arc(pts[pts.length - 1].x, pts[pts.length - 1].y, 10, 0, Math.PI * 2)
       ctx.fill()
-      ctx.strokeStyle = '#ffffff'
+      ctx.strokeStyle = theme === 'ink' ? '#fdfbf7' : '#ffffff'
       ctx.lineWidth = 3
       ctx.stroke()
       ctx.restore()
@@ -381,12 +604,36 @@ export async function renderCertificationCard(canvas, options = {}) {
     const boxX = 80 + idx * (statBoxW + 20)
     
     // 통계 박스 배경
-    ctx.fillStyle = themeCfg.statBg
-    ctx.strokeStyle = themeCfg.cardBorder
-    ctx.lineWidth = 1.5
-    roundRect(ctx, boxX, statsY, statBoxW, statBoxH, 16)
-    ctx.fill()
-    ctx.stroke()
+    if (theme === 'ink') {
+      ctx.save()
+      ctx.fillStyle = themeCfg.statBg
+      ctx.strokeStyle = 'rgba(184, 74, 72, 0.22)'
+      ctx.lineWidth = 1.5
+      ctx.shadowColor = 'rgba(124, 110, 101, 0.08)'
+      ctx.shadowBlur = 10
+      ctx.shadowOffsetY = 3
+      roundRect(ctx, boxX, statsY, statBoxW, statBoxH, 14)
+      ctx.fill()
+      ctx.stroke()
+      ctx.restore()
+    } else if (theme === 'dark') {
+      // 심플 테마: 묵직한 불투명 면 채우기를 덜어내고 슬림 1px 라인으로 정갈한 여백 유지
+      ctx.save()
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.03)'
+      ctx.strokeStyle = themeCfg.cardBorder
+      ctx.lineWidth = 1
+      roundRect(ctx, boxX, statsY, statBoxW, statBoxH, 12)
+      ctx.fill()
+      ctx.stroke()
+      ctx.restore()
+    } else {
+      ctx.fillStyle = themeCfg.statBg
+      ctx.strokeStyle = themeCfg.cardBorder
+      ctx.lineWidth = 1.5
+      roundRect(ctx, boxX, statsY, statBoxW, statBoxH, 16)
+      ctx.fill()
+      ctx.stroke()
+    }
 
     // 라벨
     ctx.textAlign = 'center'

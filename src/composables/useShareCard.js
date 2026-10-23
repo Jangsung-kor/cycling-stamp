@@ -2,6 +2,7 @@ import { ref, reactive, computed } from 'vue'
 import {
   CARD_DIMENSIONS,
   CARD_THEMES,
+  SIMPLE_SUB_COLORS,
   renderCertificationCard,
   canvasToBlob,
   loadImage
@@ -16,6 +17,7 @@ const isSharing = ref(false)
 const cardType = ref('track') // 'track' | 'course'
 const selectedRatio = ref('story') // 'story' | 'square'
 const selectedTheme = ref('dark') // 'dark' | 'ink' | 'photo'
+const selectedSimpleColor = ref('black') // 'black' | 'navy'
 
 const userPhotoUrl = ref(null)
 const userPhotoFile = ref(null)
@@ -153,6 +155,7 @@ export function useShareCard() {
       await renderCertificationCard(canvasEl, {
         aspectRatio: selectedRatio.value,
         theme: selectedTheme.value,
+        simpleColor: selectedSimpleColor.value,
         trackTitle: cardData.trackTitle,
         courseName: cardData.courseName,
         distanceKm: cardData.distanceKm,
@@ -245,11 +248,13 @@ export function useShareCard() {
     cardType,
     selectedRatio,
     selectedTheme,
+    selectedSimpleColor,
     userPhotoUrl,
     cardData,
     riderInfo,
     dimensions: CARD_DIMENSIONS,
     themes: CARD_THEMES,
+    simpleSubColors: SIMPLE_SUB_COLORS,
 
     // 메서드
     openForTrack,

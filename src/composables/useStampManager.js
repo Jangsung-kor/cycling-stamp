@@ -17,6 +17,7 @@ export function useStampManager() {
   const themeStore = useThemeStore()
 
   // 1. 전체 인증센터 목록에 사용자의 스탬프 획득 상태 및 다회차(xN) 정보 병합
+  const acquiredStamps = computed(() => stampStore.acquiredStamps || [])
   const enrichedCenters = computed(() => {
     return certCenters.map(center => {
       const stamp = stampStore.acquiredStamps.find(s => s.id === center.id)
@@ -193,6 +194,7 @@ export function useStampManager() {
 
   return {
     // 상태 및 통계
+    acquiredStamps,
     enrichedCenters,
     totalCount,
     acquiredCount,

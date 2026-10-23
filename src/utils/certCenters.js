@@ -85,7 +85,7 @@ export const certCenters = [
   { id: 84, name: '법환바당인증센터', lat: 33.235774, lng: 126.515081, route: '제주환상자전거길', address: '제주특별자치도 서귀포시 막숙포로 61' },
   { id: 85, name: '송악산인증센터', lat: 33.206761, lng: 126.289484, route: '제주환상자전거길', address: '제주 서귀포시 대정읍 상모리 157-2' },
 ];
-import { generateStampSvg } from './stampGenerator'
+import { generateStampSvg } from './stampGenerator.js'
 
 export const getStampImageUrl = (center, isAcquired, inkColor) => {
   return generateStampSvg(center, isAcquired, inkColor);

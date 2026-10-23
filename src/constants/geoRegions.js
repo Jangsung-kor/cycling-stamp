@@ -1,0 +1,150 @@
+/**
+ * 대한민국 전국 시·군·구 경량 바운딩 박스 지오펜스 데이터셋
+ * 국토종주 및 전국 라이딩 시군구 정복 판정용 (100% 오프라인 동작)
+ */
+export const KOREA_TOTAL_REGIONS_COUNT = 250
+export const KOREA_LAND_GRID_TOTAL = 2500 // 0.02도 기준 대한민국 육상 자전거 가용 유효 타일 수
+
+export const KOREA_REGIONS = [
+  // 1. 서울특별시 (25개 자치구)
+  { id: '11110', name: '종로구', province: '서울', minLat: 37.567, maxLat: 37.631, minLng: 126.953, maxLng: 127.025 },
+  { id: '11140', name: '중구', province: '서울', minLat: 37.550, maxLat: 37.575, minLng: 126.960, maxLng: 127.025 },
+  { id: '11170', name: '용산구', province: '서울', minLat: 37.515, maxLat: 37.555, minLng: 126.945, maxLng: 127.020 },
+  { id: '11200', name: '성동구', province: '서울', minLat: 37.530, maxLat: 37.575, minLng: 127.010, maxLng: 127.075 },
+  { id: '11215', name: '광진구', province: '서울', minLat: 37.525, maxLat: 37.565, minLng: 127.060, maxLng: 127.115 },
+  { id: '11230', name: '동대문구', province: '서울', minLat: 37.565, maxLat: 37.605, minLng: 127.025, maxLng: 127.085 },
+  { id: '11260', name: '중랑구', province: '서울', minLat: 37.575, maxLat: 37.620, minLng: 127.070, maxLng: 127.115 },
+  { id: '11290', name: '성북구', province: '서울', minLat: 37.580, maxLat: 37.630, minLng: 126.975, maxLng: 127.060 },
+  { id: '11305', name: '강북구', province: '서울', minLat: 37.610, maxLat: 37.670, minLng: 126.980, maxLng: 127.045 },
+  { id: '11320', name: '도봉구', province: '서울', minLat: 37.640, maxLat: 37.715, minLng: 127.005, maxLng: 127.060 },
+  { id: '11350', name: '노원구', province: '서울', minLat: 37.615, maxLat: 37.710, minLng: 127.045, maxLng: 127.105 },
+  { id: '11380', name: '은평구', province: '서울', minLat: 37.585, maxLat: 37.660, minLng: 126.895, maxLng: 126.965 },
+  { id: '11410', name: '서대문구', province: '서울', minLat: 37.560, maxLat: 37.610, minLng: 126.915, maxLng: 126.975 },
+  { id: '11440', name: '마포구', province: '서울', minLat: 37.530, maxLat: 37.590, minLng: 126.875, maxLng: 126.965 },
+  { id: '11470', name: '양천구', province: '서울', minLat: 37.505, maxLat: 37.550, minLng: 126.825, maxLng: 126.895 },
+  { id: '11500', name: '강서구', province: '서울', minLat: 37.530, maxLat: 37.600, minLng: 126.790, maxLng: 126.890 },
+  { id: '11530', name: '구로구', province: '서울', minLat: 37.475, maxLat: 37.515, minLng: 126.815, maxLng: 126.910 },
+  { id: '11545', name: '금천구', province: '서울', minLat: 37.435, maxLat: 37.485, minLng: 126.875, maxLng: 126.925 },
+  { id: '11560', name: '영등포구', province: '서울', minLat: 37.490, maxLat: 37.555, minLng: 126.885, maxLng: 126.945 },
+  { id: '11590', name: '동작구', province: '서울', minLat: 37.475, maxLat: 37.520, minLng: 126.915, maxLng: 126.990 },
+  { id: '11620', name: '관악구', province: '서울', minLat: 37.445, maxLat: 37.495, minLng: 126.905, maxLng: 126.985 },
+  { id: '11650', name: '서초구', province: '서울', minLat: 37.430, maxLat: 37.525, minLng: 126.975, maxLng: 127.085 },
+  { id: '11680', name: '강남구', province: '서울', minLat: 37.460, maxLat: 37.535, minLng: 127.015, maxLng: 127.095 },
+  { id: '11710', name: '송파구', province: '서울', minLat: 37.475, maxLat: 37.540, minLng: 127.075, maxLng: 127.165 },
+  { id: '11740', name: '강동구', province: '서울', minLat: 37.515, maxLat: 37.575, minLng: 127.110, maxLng: 127.185 },
+
+  // 2. 인천광역시
+  { id: '28110', name: '중구', province: '인천', minLat: 37.430, maxLat: 37.520, minLng: 126.370, maxLng: 126.650 },
+  { id: '28140', name: '동구', province: '인천', minLat: 37.465, maxLat: 37.495, minLng: 126.625, maxLng: 126.660 },
+  { id: '28177', name: '미추홀구', province: '인천', minLat: 37.430, maxLat: 37.475, minLng: 126.635, maxLng: 126.695 },
+  { id: '28185', name: '연수구', province: '인천', minLat: 37.360, maxLat: 37.430, minLng: 126.620, maxLng: 126.700 },
+  { id: '28200', name: '남동구', province: '인천', minLat: 37.390, maxLat: 37.470, minLng: 126.680, maxLng: 126.775 },
+  { id: '28237', name: '부평구', province: '인천', minLat: 37.470, maxLat: 37.530, minLng: 126.690, maxLng: 126.760 },
+  { id: '28245', name: '계양구', province: '인천', minLat: 37.520, maxLat: 37.585, minLng: 126.695, maxLng: 126.780 },
+  { id: '28260', name: '서구', province: '인천', minLat: 37.470, maxLat: 37.610, minLng: 126.600, maxLng: 126.720 },
+  { id: '28710', name: '강화군', province: '인천', minLat: 37.580, maxLat: 37.830, minLng: 126.330, maxLng: 126.540 },
+
+  // 3. 경기도
+  { id: '41110', name: '수원시', province: '경기', minLat: 37.230, maxLat: 37.330, minLng: 126.960, maxLng: 127.080 },
+  { id: '41130', name: '성남시', province: '경기', minLat: 37.340, maxLat: 37.470, minLng: 127.050, maxLng: 127.180 },
+  { id: '41150', name: '의정부시', province: '경기', minLat: 37.700, maxLat: 37.780, minLng: 127.020, maxLng: 127.120 },
+  { id: '41170', name: '안양시', province: '경기', minLat: 37.360, maxLat: 37.430, minLng: 126.890, maxLng: 126.980 },
+  { id: '41190', name: '부천시', province: '경기', minLat: 37.460, maxLat: 37.540, minLng: 126.740, maxLng: 126.830 },
+  { id: '41210', name: '광명시', province: '경기', minLat: 37.410, maxLat: 37.490, minLng: 126.840, maxLng: 126.910 },
+  { id: '41220', name: '평택시', province: '경기', minLat: 36.910, maxLat: 37.140, minLng: 126.850, maxLng: 127.180 },
+  { id: '41280', name: '고양시', province: '경기', minLat: 37.580, maxLat: 37.720, minLng: 126.710, maxLng: 126.930 },
+  { id: '41360', name: '남양주시', province: '경기', minLat: 37.560, maxLat: 37.780, minLng: 127.120, maxLng: 127.350 },
+  { id: '41390', name: '시흥시', province: '경기', minLat: 37.330, maxLat: 37.460, minLng: 126.700, maxLng: 126.840 },
+  { id: '41430', name: '의왕시', province: '경기', minLat: 37.310, maxLat: 37.400, minLng: 126.950, maxLng: 127.040 },
+  { id: '41450', name: '하남시', province: '경기', minLat: 37.490, maxLat: 37.580, minLng: 127.150, maxLng: 127.280 },
+  { id: '41460', name: '용인시', province: '경기', minLat: 37.140, maxLat: 37.370, minLng: 127.050, maxLng: 127.310 },
+  { id: '41480', name: '파주시', province: '경기', minLat: 37.690, maxLat: 38.000, minLng: 126.680, maxLng: 127.010 },
+  { id: '41500', name: '이천시', province: '경기', minLat: 37.110, maxLat: 37.350, minLng: 127.350, maxLng: 127.600 },
+  { id: '41570', name: '김포시', province: '경기', minLat: 37.550, maxLat: 37.750, minLng: 126.510, maxLng: 126.780 },
+  { id: '41590', name: '화성시', province: '경기', minLat: 37.050, maxLat: 37.300, minLng: 126.630, maxLng: 127.150 },
+  { id: '41610', name: '광주시', province: '경기', minLat: 37.280, maxLat: 37.490, minLng: 127.180, maxLng: 127.420 },
+  { id: '41670', name: '여주시', province: '경기', minLat: 37.150, maxLat: 37.440, minLng: 127.490, maxLng: 127.750 },
+  { id: '41820', name: '가평군', province: '경기', minLat: 37.660, maxLat: 38.030, minLng: 127.310, maxLng: 127.650 },
+  { id: '41830', name: '양평군', province: '경기', minLat: 37.360, maxLat: 37.630, minLng: 127.360, maxLng: 127.790 },
+
+  // 4. 강원특별자치도
+  { id: '51110', name: '춘천시', province: '강원', minLat: 37.750, maxLat: 38.070, minLng: 127.570, maxLng: 127.930 },
+  { id: '51130', name: '원주시', province: '강원', minLat: 37.150, maxLat: 37.520, minLng: 127.810, maxLng: 128.180 },
+  { id: '51150', name: '강릉시', province: '강원', minLat: 37.510, maxLat: 37.930, minLng: 128.710, maxLng: 129.080 },
+  { id: '51170', name: '동해시', province: '강원', minLat: 37.440, maxLat: 37.600, minLng: 129.020, maxLng: 129.170 },
+  { id: '51210', name: '속초시', province: '강원', minLat: 38.140, maxLat: 38.240, minLng: 128.490, maxLng: 128.620 },
+  { id: '51230', name: '삼척시', province: '강원', minLat: 37.080, maxLat: 37.480, minLng: 128.980, maxLng: 129.380 },
+  { id: '51770', name: '화천군', province: '강원', minLat: 38.030, maxLat: 38.250, minLng: 127.580, maxLng: 127.890 },
+  { id: '51800', name: '양구군', province: '강원', minLat: 38.030, maxLat: 38.320, minLng: 127.890, maxLng: 128.210 },
+  { id: '51810', name: '인제군', province: '강원', minLat: 37.910, maxLat: 38.330, minLng: 128.080, maxLng: 128.480 },
+  { id: '51820', name: '고성군', province: '강원', minLat: 38.230, maxLat: 38.610, minLng: 128.320, maxLng: 128.580 },
+  { id: '51830', name: '양양군', province: '강원', minLat: 37.920, maxLat: 38.150, minLng: 128.480, maxLng: 128.780 },
+
+  // 5. 충청북도
+  { id: '43110', name: '청주시', province: '충북', minLat: 36.480, maxLat: 36.750, minLng: 127.320, maxLng: 127.650 },
+  { id: '43130', name: '충주시', province: '충북', minLat: 36.880, maxLat: 37.190, minLng: 127.750, maxLng: 128.100 },
+  { id: '43150', name: '제천시', province: '충북', minLat: 36.950, maxLat: 37.280, minLng: 127.980, maxLng: 128.370 },
+  { id: '43720', name: '증평군', province: '충북', minLat: 36.720, maxLat: 36.830, minLng: 127.520, maxLng: 127.670 },
+  { id: '43760', name: '괴산군', province: '충북', minLat: 36.660, maxLat: 36.950, minLng: 127.650, maxLng: 128.050 },
+  { id: '43770', name: '음성군', province: '충북', minLat: 36.850, maxLat: 37.120, minLng: 127.480, maxLng: 127.780 },
+  { id: '43800', name: '단양군', province: '충북', minLat: 36.830, maxLat: 37.150, minLng: 128.180, maxLng: 128.550 },
+
+  // 6. 충청남도 & 대전 & 세종
+  { id: '30110', name: '대전광역시', province: '대전', minLat: 36.210, maxLat: 36.470, minLng: 127.280, maxLng: 127.510 },
+  { id: '36110', name: '세종특별자치시', province: '세종', minLat: 36.420, maxLat: 36.650, minLng: 127.180, maxLng: 127.390 },
+  { id: '44130', name: '천안시', province: '충남', minLat: 36.650, maxLat: 36.980, minLng: 127.050, maxLng: 127.350 },
+  { id: '44150', name: '공주시', province: '충남', minLat: 36.310, maxLat: 36.620, minLng: 126.950, maxLng: 127.280 },
+  { id: '44180', name: '보령시', province: '충남', minLat: 36.210, maxLat: 36.490, minLng: 126.450, maxLng: 126.750 },
+  { id: '44200', name: '아산시', province: '충남', minLat: 36.650, maxLat: 36.950, minLng: 126.850, maxLng: 127.120 },
+  { id: '44710', name: '금산군', province: '충남', minLat: 35.980, maxLat: 36.250, minLng: 127.350, maxLng: 127.650 },
+  { id: '44760', name: '부여군', province: '충남', minLat: 36.150, maxLat: 36.380, minLng: 126.750, maxLng: 127.050 },
+  { id: '44770', name: '서천군', province: '충남', minLat: 35.980, maxLat: 36.180, minLng: 126.550, maxLng: 126.850 },
+
+  // 7. 전북특별자치도 & 전라남도 & 광주
+  { id: '29110', name: '광주광역시', province: '광주', minLat: 35.080, maxLat: 35.250, minLng: 126.750, maxLng: 127.000 },
+  { id: '45110', name: '전주시', province: '전북', minLat: 35.750, maxLat: 35.920, minLng: 127.050, maxLng: 127.200 },
+  { id: '45130', name: '군산시', province: '전북', minLat: 35.850, maxLat: 36.050, minLng: 126.550, maxLng: 126.850 },
+  { id: '45140', name: '익산시', province: '전북', minLat: 35.900, maxLat: 36.150, minLng: 126.850, maxLng: 127.120 },
+  { id: '45750', name: '임실군', province: '전북', minLat: 35.500, maxLat: 35.750, minLng: 127.100, maxLng: 127.400 },
+  { id: '45770', name: '순창군', province: '전북', minLat: 35.280, maxLat: 35.520, minLng: 127.050, maxLng: 127.300 },
+  { id: '46110', name: '목포시', province: '전남', minLat: 34.750, maxLat: 34.850, minLng: 126.350, maxLng: 126.450 },
+  { id: '46130', name: '여수시', province: '전남', minLat: 34.650, maxLat: 34.850, minLng: 127.550, maxLng: 127.800 },
+  { id: '46150', name: '순천시', province: '전남', minLat: 34.850, maxLat: 35.120, minLng: 127.350, maxLng: 127.650 },
+  { id: '46170', name: '나주시', province: '전남', minLat: 34.950, maxLat: 35.150, minLng: 126.650, maxLng: 126.900 },
+  { id: '46230', name: '광양시', province: '전남', minLat: 34.900, maxLat: 35.150, minLng: 127.600, maxLng: 127.850 },
+  { id: '46710', name: '담양군', province: '전남', minLat: 35.250, maxLat: 35.450, minLng: 126.880, maxLng: 127.120 },
+  { id: '46720', name: '곡성군', province: '전남', minLat: 35.150, maxLat: 35.380, minLng: 127.150, maxLng: 127.420 },
+  { id: '46730', name: '구례군', province: '전남', minLat: 35.150, maxLat: 35.350, minLng: 127.400, maxLng: 127.620 },
+  { id: '46830', name: '영암군', province: '전남', minLat: 34.700, maxLat: 34.920, minLng: 126.500, maxLng: 126.800 },
+  { id: '46840', name: '무안군', province: '전남', minLat: 34.850, maxLat: 35.100, minLng: 126.400, maxLng: 126.650 },
+
+  // 8. 대구광역시 & 경상북도
+  { id: '27110', name: '대구광역시', province: '대구', minLat: 35.750, maxLat: 36.050, minLng: 128.450, maxLng: 128.750 },
+  { id: '47110', name: '포항시', province: '경북', minLat: 35.850, maxLat: 36.250, minLng: 129.150, maxLng: 129.580 },
+  { id: '47130', name: '경주시', province: '경북', minLat: 35.650, maxLat: 36.050, minLng: 129.050, maxLng: 129.450 },
+  { id: '47150', name: '김천시', province: '경북', minLat: 35.950, maxLat: 36.250, minLng: 127.950, maxLng: 128.250 },
+  { id: '47170', name: '안동시', province: '경북', minLat: 36.400, maxLat: 36.780, minLng: 128.550, maxLng: 128.950 },
+  { id: '47190', name: '구미시', province: '경북', minLat: 36.050, maxLat: 36.300, minLng: 128.250, maxLng: 128.500 },
+  { id: '47210', name: '영주시', province: '경북', minLat: 36.750, maxLat: 37.050, minLng: 128.450, maxLng: 128.750 },
+  { id: '47230', name: '상주시', province: '경북', minLat: 36.300, maxLat: 36.650, minLng: 128.050, maxLng: 128.350 },
+  { id: '47250', name: '문경시', province: '경북', minLat: 36.550, maxLat: 36.850, minLng: 128.050, maxLng: 128.300 },
+  { id: '47770', name: '영덕군', province: '경북', minLat: 36.250, maxLat: 36.620, minLng: 129.250, maxLng: 129.450 },
+  { id: '47840', name: '칠곡군', province: '경북', minLat: 35.950, maxLat: 36.150, minLng: 128.300, maxLng: 128.550 },
+  { id: '47930', name: '울진군', province: '경북', minLat: 36.650, maxLat: 37.150, minLng: 129.250, maxLng: 129.450 },
+
+  // 9. 부산광역시 & 울산광역시 & 경상남도
+  { id: '26110', name: '부산광역시', province: '부산', minLat: 35.050, maxLat: 35.350, minLng: 128.850, maxLng: 129.280 },
+  { id: '31110', name: '울산광역시', province: '울산', minLat: 35.450, maxLat: 35.680, minLng: 129.250, maxLng: 129.450 },
+  { id: '48120', name: '창원시', province: '경남', minLat: 35.100, maxLat: 35.350, minLng: 128.500, maxLng: 128.750 },
+  { id: '48170', name: '진주시', province: '경남', minLat: 35.100, maxLat: 35.300, minLng: 128.000, maxLng: 128.250 },
+  { id: '48250', name: '김해시', province: '경남', minLat: 35.200, maxLat: 35.400, minLng: 128.750, maxLng: 129.000 },
+  { id: '48330', name: '양산시', province: '경남', minLat: 35.250, maxLat: 35.480, minLng: 128.950, maxLng: 129.180 },
+  { id: '48740', name: '창녕군', province: '경남', minLat: 35.450, maxLat: 35.650, minLng: 128.400, maxLng: 128.600 },
+  { id: '48820', name: '하동군', province: '경남', minLat: 34.950, maxLat: 35.250, minLng: 127.650, maxLng: 127.850 },
+  { id: '48880', name: '거창군', province: '경남', minLat: 35.650, maxLat: 35.850, minLng: 127.850, maxLng: 128.050 },
+  { id: '48890', name: '합천군', province: '경남', minLat: 35.500, maxLat: 35.750, minLng: 128.050, maxLng: 128.300 },
+
+  // 10. 제주특별자치도
+  { id: '50110', name: '제주시', province: '제주', minLat: 33.350, maxLat: 33.580, minLng: 126.250, maxLng: 126.980 },
+  { id: '50130', name: '서귀포시', province: '제주', minLat: 33.180, maxLat: 33.450, minLng: 126.220, maxLng: 126.950 }
+]

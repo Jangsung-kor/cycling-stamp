@@ -4,7 +4,7 @@
 
     <!-- 우측 상단: 나만의 주행(GPX 색칠 지도) 열기 플로팅 버튼 -->
     <button 
-      :class="['gpx-floating-trigger', { 'is-dark': themeStore.bgThemeKey === 'dark' }]"
+      :class="['gpx-floating-trigger cycling-fab', { 'is-dark': themeStore.bgThemeKey === 'dark' }]"
       @click="showGpxDrawer = true"
       :style="totalTracksCount > 0 ? {
         borderColor: themeStore.currentTheme.main,
@@ -14,7 +14,7 @@
       <span class="trigger-text">나만의 주행</span>
       <span 
         v-if="totalTracksCount > 0" 
-        class="trigger-badge" 
+        class="trigger-badge cycling-badge" 
         :style="{ backgroundColor: themeStore.currentTheme.main }"
       >
         {{ totalTracksCount }}
@@ -111,42 +111,14 @@ const handleStampAuth = async () => {
   overflow: hidden;
 }
 
-/* 우측 상단 나만의 주행 플로팅 버튼 */
+/* 우측 상단 나만의 주행 플로팅 버튼 (공통 .cycling-fab 레이아웃 확장) */
 .gpx-floating-trigger {
   position: absolute;
   top: 12px;
   right: 12px;
   z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
   padding: 7px 13px;
   border-radius: 20px;
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #1e293b;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  user-select: none;
-}
-
-.gpx-floating-trigger:active {
-  transform: scale(0.96);
-}
-
-.gpx-floating-trigger.is-dark {
-  background: rgba(30, 41, 59, 0.92);
-  color: #f1f5f9;
-  border-color: rgba(51, 65, 85, 0.85);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-}
-
-.trigger-icon {
-  font-size: 14px;
 }
 
 .trigger-text {
@@ -155,8 +127,6 @@ const handleStampAuth = async () => {
 
 .trigger-badge {
   color: #ffffff;
-  font-size: 10.5px;
-  font-weight: 800;
   padding: 1px 6px;
   border-radius: 10px;
   line-height: 1.3;

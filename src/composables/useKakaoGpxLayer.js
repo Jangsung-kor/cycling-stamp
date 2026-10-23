@@ -28,6 +28,9 @@ export function useKakaoGpxLayer(getMapInstance, themeStore, gpxStore) {
       if (item.polyline) {
         item.polyline.setMap(null)
       }
+      if (item.glowPolyline) {
+        item.glowPolyline.setMap(null)
+      }
     })
     gpxPolylineMap.clear()
   }
@@ -107,8 +110,9 @@ export function useKakaoGpxLayer(getMapInstance, themeStore, gpxStore) {
 
   /**
    * 내 주행 궤적 및 친구 주행 궤적 동시 렌더링
+   * @param {boolean} isExploration 탐험(안개) 모드 여부
    */
-  const renderGpxPolylines = () => {
+  const renderGpxPolylines = (isExploration = false) => {
     const map = getMapInstance()
     if (!map || !window.kakao || !window.kakao.maps.Polyline) return
 
@@ -124,14 +128,28 @@ export function useKakaoGpxLayer(getMapInstance, themeStore, gpxStore) {
       const isHovered = gpxStore.hoveredTrackId === track.id
       const isSelected = gpxStore.selectedTrackId === track.id
 
+      let glowPolyline = null
+      if (isExploration) {
+        // 탐험 모드: 안개를 뚫어내는 넓은 언포그 웜홀 라인
+        glowPolyline = new window.kakao.maps.Polyline({
+          map,
+          path,
+          strokeWeight: 32,
+          strokeColor: '#38bdf8',
+          strokeOpacity: 0.9,
+          strokeStyle: 'solid',
+          zIndex: isHovered ? 38 : (isSelected ? 28 : 18)
+        })
+      }
+
       const polyline = new window.kakao.maps.Polyline({
         map,
         path,
-        strokeWeight: isHovered ? 8 : (isSelected ? 6 : 4),
-        strokeColor: themeColor,
+        strokeWeight: isExploration ? 6 : (isHovered ? 8 : (isSelected ? 6 : 4)),
+        strokeColor: isExploration ? '#ffffff' : themeColor,
         strokeOpacity: isHovered ? 1.0 : (isSelected ? 0.95 : 0.8),
         strokeStyle: 'solid',
-        zIndex: isHovered ? 35 : (isSelected ? 25 : 8)
+        zIndex: isHovered ? 40 : (isSelected ? 30 : (isExploration ? 22 : 8))
       })
 
       window.kakao.maps.event.addListener(polyline, 'click', () => {
@@ -142,7 +160,7 @@ export function useKakaoGpxLayer(getMapInstance, themeStore, gpxStore) {
         })
       })
 
-      gpxPolylineMap.set(track.id, { polyline, track })
+      gpxPolylineMap.set(track.id, { polyline, glowPolyline, track })
     })
 
     // 2. 친구 트랙 렌더링 (활성화된 경우에만)

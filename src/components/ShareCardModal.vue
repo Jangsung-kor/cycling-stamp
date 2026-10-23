@@ -6,16 +6,16 @@
     round
     closeable
     :style="{ height: '94%', maxHeight: '860px' }"
-    class="share-card-popup"
+    class="share-card-popup cycling-modal-popup"
   >
-    <div class="share-card-modal">
+    <div class="share-card-modal cycling-modal-container">
       <!-- 헤더 -->
-      <div class="modal-header">
-        <h3 class="modal-title">완주 인증 포토 카드</h3>
-        <p class="modal-subtitle">인스타그램, 스트라바, 자전거 커뮤니티에 주행 기록을 공유하세요.</p>
+      <div class="modal-header cycling-modal-header">
+        <h3 class="modal-title cycling-modal-title">완주 인증 포토 카드</h3>
+        <p class="modal-subtitle cycling-modal-subtitle">인스타그램, 스트라바, 자전거 커뮤니티에 주행 기록을 공유하세요.</p>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body cycling-modal-body">
         <!-- 1. 실시간 캔버스 프리뷰 영역 -->
         <div class="preview-container">
           <div 
@@ -35,10 +35,10 @@
           <!-- 2-1. 화면 비율 선택 -->
           <div class="option-group">
             <div class="option-label">카드 비율</div>
-            <div class="segmented-control">
+            <div class="segmented-control cycling-segment-control">
               <button
                 type="button"
-                :class="['segment-btn', { active: selectedRatio === 'story' }]"
+                :class="['segment-btn cycling-segment-btn', { active: selectedRatio === 'story' }]"
                 :style="selectedRatio === 'story' ? { backgroundColor: themeStore.currentTheme.main, color: '#fff' } : {}"
                 @click="changeRatio('story')"
               >
@@ -46,7 +46,7 @@
               </button>
               <button
                 type="button"
-                :class="['segment-btn', { active: selectedRatio === 'square' }]"
+                :class="['segment-btn cycling-segment-btn', { active: selectedRatio === 'square' }]"
                 :style="selectedRatio === 'square' ? { backgroundColor: themeStore.currentTheme.main, color: '#fff' } : {}"
                 @click="changeRatio('square')"
               >
@@ -58,30 +58,53 @@
           <!-- 2-2. 테마 스타일 선택 -->
           <div class="option-group">
             <div class="option-label">배경 테마</div>
-            <div class="segmented-control">
+            <div class="segmented-control cycling-segment-control">
               <button
                 type="button"
-                :class="['segment-btn', { active: selectedTheme === 'dark' }]"
+                :class="['segment-btn cycling-segment-btn', { active: selectedTheme === 'dark' }]"
                 :style="selectedTheme === 'dark' ? { backgroundColor: themeStore.currentTheme.main, color: '#fff' } : {}"
                 @click="changeTheme('dark')"
               >
-                미니멀 다크
+                심플
               </button>
               <button
                 type="button"
-                :class="['segment-btn', { active: selectedTheme === 'ink' }]"
+                :class="['segment-btn cycling-segment-btn', { active: selectedTheme === 'ink' }]"
                 :style="selectedTheme === 'ink' ? { backgroundColor: themeStore.currentTheme.main, color: '#fff' } : {}"
                 @click="changeTheme('ink')"
               >
-                스탬프 잉크
+                아날로그 수첩
               </button>
               <button
                 type="button"
-                :class="['segment-btn', { active: selectedTheme === 'photo' }]"
+                :class="['segment-btn cycling-segment-btn', { active: selectedTheme === 'photo' }]"
                 :style="selectedTheme === 'photo' ? { backgroundColor: themeStore.currentTheme.main, color: '#fff' } : {}"
                 @click="changeTheme('photo')"
               >
                 내 사진 배경
+              </button>
+            </div>
+          </div>
+
+          <!-- 2-2-1. 심플 테마 서브 컬러 선택 (블랙 / 네이비) -->
+          <div v-if="selectedTheme === 'dark'" class="sub-option-group">
+            <div class="sub-option-label">심플 컬러</div>
+            <div class="sub-segmented-control">
+              <button
+                type="button"
+                :class="['sub-segment-btn', { active: selectedSimpleColor === 'black' }]"
+                @click="changeSimpleColor('black')"
+              >
+                <span class="color-dot dot-black"></span>
+                블랙
+              </button>
+              <button
+                type="button"
+                :class="['sub-segment-btn', { active: selectedSimpleColor === 'navy' }]"
+                @click="changeSimpleColor('navy')"
+              >
+                <span class="color-dot dot-navy"></span>
+                네이비
               </button>
             </div>
           </div>
@@ -159,6 +182,7 @@ const {
   isSharing,
   selectedRatio,
   selectedTheme,
+  selectedSimpleColor,
   userPhotoUrl,
   cardData,
   closeModal,
@@ -215,6 +239,12 @@ const changeTheme = async (themeId) => {
   requestRender()
 }
 
+// 심플 테마 서브 컬러 변경 (블랙 / 네이비)
+const changeSimpleColor = (color) => {
+  selectedSimpleColor.value = color
+  requestRender()
+}
+
 // 사진 파일 선택 핸들러
 const handlePhotoSelect = (e) => {
   const file = e.target.files?.[0]
@@ -247,39 +277,8 @@ const handleShare = () => {
 </script>
 
 <style scoped>
-.share-card-popup {
-  background-color: var(--card-bg, #ffffff);
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  overflow: hidden;
-}
-
-.share-card-modal {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  color: var(--text-main, #1f2937);
-  background-color: var(--card-bg, #ffffff);
-}
-
 .modal-header {
-  padding: 16px 20px 10px;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
-  text-align: left;
-}
-
-.modal-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text-main, #1f2937);
-  letter-spacing: -0.02em;
-}
-
-.modal-subtitle {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
-  color: var(--text-sub, #6b7280);
+  padding-bottom: 10px;
 }
 
 .modal-body {
@@ -363,29 +362,67 @@ const handleShare = () => {
   color: var(--text-sub, #6b7280);
 }
 
-.segmented-control {
+/* 세그먼트 컨트롤은 공통 .cycling-segment-control / btn 활용 */
+
+/* 심플 테마 서브 옵션 */
+.sub-option-group {
   display: flex;
-  background-color: var(--app-bg, #f1f5f9);
-  padding: 3px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--app-bg, #f8fafc);
   border-radius: 10px;
   border: 1px solid var(--border-color, #e2e8f0);
 }
 
-.segment-btn {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+.sub-option-label {
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-sub, #64748b);
+}
+
+.sub-segmented-control {
+  display: flex;
+  gap: 6px;
+}
+
+.sub-segment-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background-color: var(--card-bg, #ffffff);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main, #334155);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.segment-btn.active {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+.sub-segment-btn.active {
+  border-color: var(--brand-color, #10b981);
+  color: var(--brand-color, #10b981);
+  background-color: var(--badge-bg, rgba(16, 185, 129, 0.08));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.color-dot.dot-black {
+  background-color: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.color-dot.dot-navy {
+  background-color: #1e3a8a;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* 사진 업로드 컨트롤 */

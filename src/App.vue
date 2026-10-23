@@ -18,6 +18,9 @@
     <!-- 글로벌 완주 인증 포토 카드 모달 -->
     <ShareCardModal />
     
+    <!-- 글로벌 라이딩 신규 업적 달성 축하 다이얼로그 -->
+    <AchievementNotificationModal />
+    
     <!-- 하단 탭바: 배경 및 활성 색상이 테마와 일체화 -->
     <van-tabbar 
       v-model="active" 
@@ -39,18 +42,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './services/firebase'
 import { useStampStore } from './stores/stamp'
 import { useThemeStore } from './stores/theme'
 import { useGpxStore } from './stores/gpx'
+import { useAchievementManager } from './composables/useAchievementManager'
 import ShareCardModal from './components/ShareCardModal.vue'
+import AchievementNotificationModal from './components/AchievementNotificationModal.vue'
 
 const active = ref(0)
 const stampStore = useStampStore()
 const themeStore = useThemeStore()
 const gpxStore = useGpxStore()
+const { checkAchievements } = useAchievementManager()
+
+// 트랙 또는 스탬프 데이터 변경 시 자동으로 업적 재평가
+watch([() => gpxStore.tracks, () => stampStore.acquiredStamps], ([tracks, stamps]) => {
+  if (Array.isArray(tracks) && Array.isArray(stamps)) {
+    checkAchievements(tracks, stamps)
+  }
+}, { deep: true, immediate: true })
 
 onMounted(() => {
   // 앱 실행 시 로컬 IndexedDB에 보관된 GPX 트랙 1차 로드

@@ -1,14 +1,56 @@
 <template>
   <div class="map-wrapper">
-    <div id="map" :class="['kakao-map', `theme-${themeStore.bgThemeKey}`]"></div>
+    <div id="map" :class="['kakao-map', `theme-${themeStore.bgThemeKey}`, { 'exploration-active': isExplorationMode }]"></div>
     
+    <!-- 탐험 모드 활성화 시 미개척지 안개 마스크 오버레이 -->
+    <div v-if="isExplorationMode" class="fog-dim-overlay"></div>
+
+    <!-- 상단: [기본 모드] vs [탐험 모드] 전환 컨트롤러 -->
+    <div class="map-mode-switcher-container">
+      <div :class="['map-mode-switcher', { 'is-dark': themeStore.bgThemeKey === 'dark' }]">
+        <button
+          type="button"
+          :class="['mode-tab-btn', { active: !isExplorationMode }]"
+          @click="handleModeChange(false)"
+        >
+          기본 모드
+        </button>
+        <button
+          type="button"
+          :class="['mode-tab-btn', { active: isExplorationMode }]"
+          :style="isExplorationMode ? { backgroundColor: themeStore.currentTheme.main, color: '#ffffff' } : {}"
+          @click="handleModeChange(true)"
+        >
+          탐험 모드
+        </button>
+      </div>
+    </div>
+
+    <!-- 탐험 모드 전용 상단 현황 글래스 칩 -->
+    <div 
+      v-if="isExplorationMode" 
+      class="exploration-dashboard-chip"
+      @click="openRegionList"
+    >
+      <div class="dash-item">
+        <span class="dash-label">전국 탐험률</span>
+        <span class="dash-val tabular-nums">{{ explorationRate }}%</span>
+      </div>
+      <div class="dash-divider"></div>
+      <div class="dash-item">
+        <span class="dash-label">정복 행정구역</span>
+        <span class="dash-val tabular-nums">{{ conqueredCount }}곳</span>
+      </div>
+      <span class="dash-action">목록</span>
+    </div>
+
     <!-- 좌측 상단: 자전거도로 및 보급소(편의점) 퀵 토글 버튼 -->
     <div :class="['supply-control-panel', { 'is-dark': themeStore.bgThemeKey === 'dark' }]">
       <div class="toggle-btn-row">
 
         <!-- 2. 보급소(편의점) 퀵 토글 버튼 -->
         <button 
-          :class="['supply-toggle-btn', { active: isStoreFilterActive }]"
+          :class="['supply-toggle-btn cycling-fab', { active: isStoreFilterActive, 'is-dark': themeStore.bgThemeKey === 'dark' }]"
           @click="toggleStoreFilter"
           :style="isStoreFilterActive ? {
             backgroundColor: themeStore.currentTheme.main,
@@ -25,7 +67,7 @@
 
         <!-- 3. 숙소(숙박) 퀵 토글 버튼 -->
         <button 
-          :class="['supply-toggle-btn', { active: isAccomFilterActive }]"
+          :class="['supply-toggle-btn cycling-fab', { active: isAccomFilterActive, 'is-dark': themeStore.bgThemeKey === 'dark' }]"
           @click="toggleAccomFilter"
           :style="isAccomFilterActive ? {
             backgroundColor: '#4f46e5',
@@ -43,7 +85,7 @@
         <!-- 4. 친구 주행 궤적 레이어 퀵 토글 버튼 -->
         <button 
           v-if="gpxStore.friendTracksCount > 0"
-          :class="['supply-toggle-btn', { active: isFriendTracksLayerActive }]"
+          :class="['supply-toggle-btn cycling-fab', { active: isFriendTracksLayerActive, 'is-dark': themeStore.bgThemeKey === 'dark' }]"
           @click="toggleFriendTracksLayer"
           :style="isFriendTracksLayerActive ? {
             backgroundColor: '#06b6d4',
@@ -72,7 +114,7 @@
     <!-- 우측 하단: 내 위치 바로가기 플로팅 버튼 -->
     <button 
       type="button"
-      :class="['my-location-btn', { 'is-loading': isLocating, 'is-dark': themeStore.bgThemeKey === 'dark' }]"
+      :class="['my-location-btn cycling-fab', { 'is-loading': isLocating, 'is-dark': themeStore.bgThemeKey === 'dark' }]"
       @click="moveToMyLocation"
       :disabled="isLocating"
       title="내 위치로 이동"
@@ -99,6 +141,9 @@
     <!-- 5. GPX 고도 프로필 차트 (인터랙티브 스크러빙 & 카카오맵 연동) -->
     <ElevationChart />
 
+    <!-- 6. 정복한 행정구역 목록 모달 -->
+    <ConqueredRegionsModal />
+
   </div>
 </template>
 
@@ -111,14 +156,39 @@ import { useKakaoStoreLayer } from '../composables/useKakaoStoreLayer'
 import { useKakaoAccomLayer } from '../composables/useKakaoAccomLayer'
 import { useKakaoMyLocation } from '../composables/useKakaoMyLocation'
 import { useKakaoGpxLayer } from '../composables/useKakaoGpxLayer'
+import { useExplorationManager } from '../composables/useExplorationManager'
 import ElevationChart from './ElevationChart.vue'
+import ConqueredRegionsModal from './ConqueredRegionsModal.vue'
 
 const stampManager = useStampManager()
 const { stampStore, themeStore, certCenters, getStampSvg: getStampImageUrl } = stampManager
 const gpxStore = useGpxStore()
 
+// 0. 영토 탐험 매니저 (기본 모드 vs 탐험 모드)
+const explorationManager = useExplorationManager()
+const {
+  isExplorationMode,
+  explorationRate,
+  conqueredCount,
+  setExplorationMode,
+  openRegionList,
+  updateExploration
+} = explorationManager
+
 let mapInstance = null
 const markerList = []
+
+// 기본 모드 ↔ 탐험 모드 전환 핸들러
+const handleModeChange = (isExploration) => {
+  setExplorationMode(isExploration)
+  renderGpxPolylines(isExploration)
+  if (isExploration) {
+    showToast({
+      message: '탐험 모드: 내가 달린 길만 밝혀집니다.',
+      duration: 2000
+    })
+  }
+}
 
 // 2. 보급소(편의점) 검색 레이어 매니저 (퍼사드 추출)
 const storeLayer = useKakaoStoreLayer(() => mapInstance)
@@ -282,8 +352,9 @@ const initMap = () => {
   mapInstance = map
   window.kakaoMap = map
   
-  // 1. 나만의 주행 기록 (GPX 궤적) 렌더링
-  renderGpxPolylines()
+  // 0. 영토 탐험 통계 계산 및 나만의 주행 기록 (GPX 궤적) 렌더링
+  updateExploration(gpxStore.visibleTracks)
+  renderGpxPolylines(isExplorationMode.value)
 
   // 2. 인증센터 마커 렌더링
   const inkColor = themeStore.currentTheme.main
@@ -338,6 +409,12 @@ const initMap = () => {
     handleAccomMapMovement()
   })
 }
+
+// 트랙 목록 변경 시 탐험 통계 갱신 및 폴리라인 동기화
+watch(() => gpxStore.visibleTracks, (tracks) => {
+  updateExploration(tracks)
+  renderGpxPolylines(isExplorationMode.value)
+}, { deep: true })
 </script>
 
 <style scoped>
@@ -355,6 +432,111 @@ const initMap = () => {
   left: 0;
   background-color: #f7f8fa;
   transition: filter 0.3s ease, background-color 0.3s ease;
+}
+
+/* 탐험 모드 안개 오버레이 레이어 */
+.fog-dim-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(1px);
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 0.3s ease;
+}
+
+/* 상단 중앙: 기본 모드 ↔ 탐험 모드 세그먼트 스위처 */
+.map-mode-switcher-container {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+}
+
+.map-mode-switcher {
+  display: flex;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 3px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-mode-switcher.is-dark {
+  background: rgba(30, 41, 59, 0.92);
+  border-color: #334155;
+}
+
+.mode-tab-btn {
+  border: none;
+  background: transparent;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub, #64748b);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.mode-tab-btn.active {
+  background-color: var(--card-bg, #ffffff);
+  color: var(--text-main, #0f172a);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 탐험 모드 전용 상단 현황 글래스 칩 */
+.exploration-dashboard-chip {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 20px;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+.dash-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dash-label {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.dash-val {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+.dash-divider {
+  width: 1px;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dash-action {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin-left: 2px;
 }
 
 /* 테마별 타일 필터 설정 (마커 제외, 카카오 지도 배경 타일만 타겟팅) */
@@ -395,33 +577,12 @@ const initMap = () => {
   gap: 6px;
 }
 
+/* 좌측 상단 보급소/숙소/친구 토글 버튼 (공통 .cycling-fab 확장) */
 .supply-toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
   padding: 7px 13px;
   border-radius: 20px;
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   font-size: 12.5px;
   font-weight: 700;
-  color: #1e293b;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  user-select: none;
-}
-
-.supply-toggle-btn:active {
-  transform: scale(0.96);
-}
-
-.supply-control-panel.is-dark .supply-toggle-btn:not(.active) {
-  background: rgba(30, 41, 59, 0.92);
-  color: #f1f5f9;
-  border-color: rgba(51, 65, 85, 0.85);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .supply-toggle-btn.active {
@@ -473,6 +634,7 @@ const initMap = () => {
 }
 
 /* 우측 하단 내 위치 플로팅 버튼 */
+/* 우측 하단 내 위치 플로팅 버튼 (공통 .cycling-fab 확장) */
 .my-location-btn {
   position: absolute;
   bottom: 74px;
@@ -480,33 +642,8 @@ const initMap = () => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #1e293b;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
   z-index: 20;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
-}
-
-.my-location-btn:active {
-  transform: scale(0.92);
-  background: #f8fafc;
-}
-
-.my-location-btn.is-dark {
-  background: #27272a;
-  border-color: #3f3f46;
-  color: #f4f4f5;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-}
-
-.my-location-btn.is-dark:active {
-  background: #3f3f46;
 }
 
 .my-location-btn.is-loading .location-icon {

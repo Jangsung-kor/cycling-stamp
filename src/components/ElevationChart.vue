@@ -403,6 +403,7 @@ const handlePointerLeave = () => {
 </script>
 
 <style scoped>
+/* 고도 차트 카드 (공통 .cycling-glass-card 확장) */
 .elevation-chart-card {
   position: absolute;
   bottom: 24px;
@@ -410,13 +411,7 @@ const handlePointerLeave = () => {
   right: 16px;
   max-width: 720px;
   margin: 0 auto;
-  background: rgba(15, 23, 42, 0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
   padding: 12px 14px 8px 14px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   z-index: 30;
   display: flex;
   flex-direction: column;
@@ -465,19 +460,9 @@ const handlePointerLeave = () => {
   font-size: 13px;
   font-weight: 600;
   color: #f1f5f9;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .friend-badge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(6, 182, 212, 0.2);
-  color: #38bdf8;
-  border: 1px solid rgba(6, 182, 212, 0.35);
   flex-shrink: 0;
 }
 

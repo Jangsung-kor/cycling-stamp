@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/test_gpx_parser.js && node tests/test_gpx_store.js && node tests/test_integration_gpx_flow.js && node tests/test_gpx_manager.js && node tests/test_friend_system.js && node tests/test_gpx_visibility.js && node tests/test_integration_social_gpx.js && node tests/test_accom_layer.js && node tests/test_my_location.js && node tests/test_elevation_profile.js && node tests/test_gpx_sync_deletion.js && node tests/test_share_card.js",
+    "test": "node tests/test_gpx_parser.js && node tests/test_gpx_store.js && node tests/test_integration_gpx_flow.js && node tests/test_gpx_manager.js && node tests/test_friend_system.js && node tests/test_gpx_visibility.js && node tests/test_integration_social_gpx.js && node tests/test_accom_layer.js && node tests/test_my_location.js && node tests/test_elevation_profile.js && node tests/test_gpx_sync_deletion.js && node tests/test_share_card.js && node tests/test_achievements.js && node tests/test_exploration.js",
     "deploy": "vite build && npx firebase-tools deploy --only hosting"
   },
   "dependencies": {

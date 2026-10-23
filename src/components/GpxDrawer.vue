@@ -13,7 +13,7 @@
         <div class="header-title-row">
 
           <span class="header-title">주행 기록</span>
-          <span class="track-count-badge" :style="{ backgroundColor: themeStore.currentTheme.main }">
+          <span class="track-count-badge cycling-badge" :style="{ backgroundColor: themeStore.currentTheme.main }">
             총 {{ activeTab === 'my' ? totalTracksCount : friendTracksCount }}개
           </span>
         </div>
@@ -138,7 +138,7 @@
                       />
                     </template>
                     <template v-else>
-                      <span class="track-title" :title="track.title">{{ track.title }}</span>
+                      <span class="track-title text-truncate" :title="track.title">{{ track.title }}</span>
                       <button class="icon-btn edit-btn" @click="startEditTitle(track)" title="이름 수정">
                         ✏️
                       </button>
@@ -179,16 +179,16 @@
 
                 <!-- 2행: 주행 통계 정보 칩 -->
                 <div class="card-stats-row">
-                  <span class="stat-chip cycling-chip highlight" :style="{ color: themeStore.currentTheme.main, backgroundColor: `${themeStore.currentTheme.main}12` }">
+                  <span class="cycling-chip highlight" :style="{ color: themeStore.currentTheme.main, backgroundColor: `${themeStore.currentTheme.main}12` }">
                     {{ track.distanceKm }} km
                   </span>
-                  <span v-if="track.elevationGainM > 0" class="stat-chip cycling-chip">
+                  <span v-if="track.elevationGainM > 0" class="cycling-chip">
                     {{ track.elevationGainM }} m
                   </span>
-                  <span v-if="track.durationMinutes > 0" class="stat-chip cycling-chip">
+                  <span v-if="track.durationMinutes > 0" class="cycling-chip">
                     {{ formatDuration(track.durationMinutes) }}
                   </span>
-                  <span class="stat-chip cycling-chip date">
+                  <span class="cycling-chip date">
                     {{ formatDate(track.startTime || track.createdAt) }}
                   </span>
                   <button
@@ -236,7 +236,7 @@
           </div>
           <button 
             type="button" 
-            class="refresh-friends-btn" 
+            class="refresh-friends-btn cycling-btn-subtle friend" 
             :disabled="isRefreshingFriends"
             @click="refreshFriendsTracks"
           >
@@ -295,22 +295,22 @@
               </div>
 
               <!-- 2행: 트랙 제목 -->
-              <div class="friend-track-title">
+              <div class="friend-track-title text-truncate">
                 <span>{{ fTrack.title }}</span>
               </div>
 
               <!-- 3행: 주행 통계 정보 칩 -->
               <div class="card-stats-row">
-                <span class="stat-chip cycling-chip friend">
+                <span class="cycling-chip friend">
                   {{ fTrack.distanceKm }} km
                 </span>
-                <span v-if="fTrack.elevationGainM > 0" class="stat-chip cycling-chip friend">
+                <span v-if="fTrack.elevationGainM > 0" class="cycling-chip friend">
                   {{ fTrack.elevationGainM }} m
                 </span>
-                <span v-if="fTrack.durationMinutes > 0" class="stat-chip cycling-chip friend">
+                <span v-if="fTrack.durationMinutes > 0" class="cycling-chip friend">
                   {{ formatDuration(fTrack.durationMinutes) }}
                 </span>
-                <span v-if="fTrack.date || fTrack.startTime || fTrack.createdAt" class="stat-chip cycling-chip date">
+                <span v-if="fTrack.date || fTrack.startTime || fTrack.createdAt" class="cycling-chip date">
                   {{ formatDate(fTrack.date || fTrack.startTime || fTrack.createdAt) }}
                 </span>
                 <button
@@ -955,30 +955,7 @@ const cancelEditTitle = () => {
   gap: 5px;
 }
 
-.stat-chip {
-  font-size: 10.5px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 5px;
-  background-color: var(--app-bg, #f1f5f9);
-  color: var(--text-sub, #475569);
-  white-space: nowrap;
-}
-
-.stat-chip.highlight {
-  font-weight: 800;
-}
-
-.stat-chip.friend-chip {
-  background-color: #ecfeff;
-  color: #0891b2;
-}
-
-.stat-chip.comp-chip {
-  color: #059669;
-  background-color: #ecfdf5;
-  font-size: 10px;
-}
+/* 통계 칩은 공통 .cycling-chip 클래스 사용 */
 
 /* 빈 상태 */
 .empty-state {

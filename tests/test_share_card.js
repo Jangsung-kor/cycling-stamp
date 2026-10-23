@@ -5,6 +5,7 @@ import assert from 'assert'
 import {
   CARD_DIMENSIONS,
   CARD_THEMES,
+  SIMPLE_SUB_COLORS,
   computeTrackBounds,
   projectCoordinatesToCanvas,
   formatCardDuration,
@@ -45,6 +46,31 @@ test('1-2. CARD_THEMES: dark, ink, photo 프리셋 필수 속성 검증', () => 
     assert.ok(t.cardBorder)
     assert.ok(t.trackDefaultColor)
   })
+  assert.strictEqual(CARD_THEMES.dark.name, '심플')
+})
+
+test('1-3. CARD_THEMES.ink: 아날로그 수첩 전용 이중 프레임/워터마크/격자 속성 정합성 검증', () => {
+  const ink = CARD_THEMES.ink
+  assert.strictEqual(ink.name, '아날로그 수첩', '테마 이름은 아날로그 수첩이어야 함')
+  assert.ok(ink.outerBorder, 'outerBorder 속성이 존재해야 함')
+  assert.ok(ink.innerBorder, 'innerBorder 속성이 존재해야 함')
+  assert.ok(ink.gridColor, 'gridColor 속성이 존재해야 함')
+  assert.ok(ink.sealColor, 'sealColor 속성이 존재해야 함')
+  assert.strictEqual(ink.trackDefaultColor, '#b84a48', '아날로그 수첩 궤적은 애쉬 레드(#b84a48)이어야 함')
+})
+
+test('1-4. SIMPLE_SUB_COLORS: 블랙 및 네이비 서브 컬러 프리셋 정합성 검증', () => {
+  assert.ok(SIMPLE_SUB_COLORS.black, 'black 서브 컬러가 정의되어 있어야 함')
+  assert.strictEqual(SIMPLE_SUB_COLORS.black.name, '블랙')
+  assert.ok(SIMPLE_SUB_COLORS.black.bgStart)
+  assert.ok(SIMPLE_SUB_COLORS.black.bgEnd)
+  assert.ok(SIMPLE_SUB_COLORS.black.trackDefaultColor)
+
+  assert.ok(SIMPLE_SUB_COLORS.navy, 'navy 서브 컬러가 정의되어 있어야 함')
+  assert.strictEqual(SIMPLE_SUB_COLORS.navy.name, '네이비')
+  assert.ok(SIMPLE_SUB_COLORS.navy.bgStart)
+  assert.ok(SIMPLE_SUB_COLORS.navy.bgEnd)
+  assert.ok(SIMPLE_SUB_COLORS.navy.trackDefaultColor)
 })
 
 // 2. 바운딩 박스 연산 검증
@@ -170,6 +196,18 @@ test('5-3. useShareCard: closeModal 호출 시 모달 상태 및 사진 정리',
   share.closeModal()
   assert.strictEqual(share.isModalOpen.value, false)
   assert.strictEqual(share.userPhotoUrl.value, null)
+})
+
+test('5-4. useShareCard: 심플 테마 서브 컬러(black, navy) 상태 관리 정합성 검증', () => {
+  const share = useShareCard()
+  assert.ok(share.selectedSimpleColor)
+  assert.strictEqual(share.selectedSimpleColor.value, 'black', '기본 심플 컬러는 블랙이어야 함')
+
+  share.selectedSimpleColor.value = 'navy'
+  assert.strictEqual(share.selectedSimpleColor.value, 'navy', '네이비 서브 컬러로 변경 가능해야 함')
+
+  assert.ok(share.simpleSubColors.black)
+  assert.ok(share.simpleSubColors.navy)
 })
 
 console.log(`\n========================================`)

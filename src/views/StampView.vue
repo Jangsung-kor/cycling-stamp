@@ -6,7 +6,7 @@
     <div class="summary-card">
       <div class="summary-header">
         <div class="summary-title">종주 달성 현황</div>
-        <div class="summary-badge">
+        <div class="summary-badge tabular-nums">
           <span class="count-highlight" :style="{ color: themeStore.currentTheme.main }">
             {{ acquiredCount }}
           </span> / {{ totalCount }} 완료
@@ -24,7 +24,7 @@
       />
       
       <div class="summary-footer">
-        <span class="rate-text">전체 달성률: <strong>{{ progressRate }}%</strong></span>
+        <span class="rate-text">전체 달성률: <strong class="tabular-nums">{{ progressRate }}%</strong></span>
         <span class="cheer-text" :style="{ color: themeStore.currentTheme.main }">{{ cheerMessage }}</span>
       </div>
     </div>
@@ -41,34 +41,28 @@
     </van-tabs>
 
     <!-- 탭 하위 코스별 달성 현황 카드 (접이식) -->
-    <div 
-      class="course-status-card"
-      :style="{
-        backgroundColor: themeStore.isDark ? '#1e1e1e' : '#ffffff',
-        borderColor: themeStore.isDark ? '#2e2e2e' : '#e2e8f0'
-      }"
-    >
+    <div class="course-status-card">
       <!-- 1) 개별 코스 탭 선택 시 (예: 남한강, 제주 등) -->
       <div v-if="currentCourse" class="course-specific-view">
         <div class="course-header" @click="isCourseDetailExpanded = !isCourseDetailExpanded">
           <div class="course-header-left">
-            <span class="course-title">{{ currentCourse.tab }}</span>
+            <span class="course-title text-truncate">{{ currentCourse.tab }}</span>
             <span 
               v-if="currentCourse.isCompleted" 
               class="course-complete-badge"
               :style="{ backgroundColor: themeStore.currentTheme.main }"
             >
-              🏆 완주
+              완주
             </span>
           </div>
 
           <div class="course-header-right">
-            <span class="course-count-text">
+            <span class="course-count-text tabular-nums">
               <strong :style="{ color: themeStore.currentTheme.main }">{{ currentCourse.acquired }}</strong> / {{ currentCourse.total }}
               <span class="course-rate-text">({{ currentCourse.rate }}%)</span>
             </span>
             <button class="toggle-btn" type="button" @click.stop="isCourseDetailExpanded = !isCourseDetailExpanded">
-              {{ isCourseDetailExpanded ? '접기 ▲' : '상세 ▼' }}
+              {{ isCourseDetailExpanded ? '접기' : '상세' }}
             </button>
           </div>
         </div>
@@ -98,16 +92,16 @@
               완주 인증 카드 내보내기
             </button>
           </div>
+
           <div v-else class="remaining-centers-box">
             <div class="remaining-title">
-              📍 남은 인증센터 <strong>({{ currentCourse.remainingCenters.length }}개)</strong>
+              남은 인증센터 <strong>({{ currentCourse.remainingCenters.length }}개)</strong>
             </div>
             <div class="remaining-tags">
               <span 
                 v-for="rem in currentCourse.remainingCenters" 
                 :key="rem.id" 
                 class="remaining-tag"
-                :style="themeStore.isDark ? { background: '#27272a', color: '#cbd5e1', borderColor: '#3f3f46' } : {}"
               >
                 {{ rem.name }}
               </span>
@@ -120,9 +114,9 @@
       <div v-else class="course-all-view">
         <div class="course-header" @click="isCourseDetailExpanded = !isCourseDetailExpanded">
           <div class="course-header-left">
-            <span class="course-title">코스별 종주 달성</span>
+            <span class="course-title text-truncate">코스별 종주 달성</span>
             <span 
-              class="course-complete-badge"
+              class="course-complete-badge tabular-nums"
               :style="{ backgroundColor: completedCourseCount > 0 ? themeStore.currentTheme.main : '#94a3b8' }"
             >
               {{ completedCourseCount }} / 13 코스 완주
@@ -131,7 +125,7 @@
 
           <div class="course-header-right">
             <button class="toggle-btn" type="button" @click.stop="isCourseDetailExpanded = !isCourseDetailExpanded">
-              {{ isCourseDetailExpanded ? '접기 ▲' : '코스 목록 ▼' }}
+              {{ isCourseDetailExpanded ? '접기' : '코스 목록' }}
             </button>
           </div>
         </div>
@@ -143,13 +137,12 @@
             :key="c.tab"
             class="course-chip"
             :class="{ completed: c.isCompleted }"
-            :style="themeStore.isDark ? { background: '#262626', borderColor: '#333' } : {}"
             @click="selectCourseTab(c.tab)"
           >
             <div class="chip-top">
-              <span class="chip-name">{{ c.tab }}</span>
-              <span v-if="c.isCompleted" class="chip-trophy">🏆</span>
-              <span v-else class="chip-rate" :style="{ color: themeStore.currentTheme.main }">{{ c.rate }}%</span>
+              <span class="chip-name text-truncate">{{ c.tab }}</span>
+              <span v-if="c.isCompleted" class="chip-complete-tag" :style="{ color: themeStore.currentTheme.main }">완주</span>
+              <span v-else class="chip-rate tabular-nums" :style="{ color: themeStore.currentTheme.main }">{{ c.rate }}%</span>
             </div>
             <div class="chip-bar">
               <div 
@@ -157,7 +150,7 @@
                 :style="{ width: `${c.rate}%`, backgroundColor: themeStore.currentTheme.main }"
               ></div>
             </div>
-            <div class="chip-count">{{ c.acquired }}/{{ c.total }}</div>
+            <div class="chip-count tabular-nums">{{ c.acquired }}/{{ c.total }}</div>
           </div>
         </div>
       </div>
@@ -173,10 +166,7 @@
           borderColor: themeStore.isDark ? themeStore.currentTheme.cardBorderDark : themeStore.currentTheme.cardBorderLight, 
           backgroundColor: themeStore.isDark ? themeStore.currentTheme.cardBgDark : themeStore.currentTheme.cardBgLight,
           boxShadow: `0 2px 10px ${themeStore.currentTheme.cardShadow}`
-        } : {
-          backgroundColor: themeStore.isDark ? '#1a1a1a' : '#ffffff',
-          borderColor: themeStore.isDark ? '#2a2a2a' : '#e2e8f0'
-        }"
+        } : {}"
         @click="showDetail(center)"
       >
         <!-- 도장 프레임 & 그래픽 -->
@@ -184,7 +174,7 @@
           <!-- xN 배지 (1회 이상 달성 시 우측 상단 표시) -->
           <span 
             v-if="center.isAcquired" 
-            class="visit-badge" 
+            class="visit-badge tabular-nums" 
             :style="{ 
               backgroundColor: themeStore.currentTheme.main,
               boxShadow: `0 2px 6px ${themeStore.currentTheme.cardShadow}`
@@ -199,22 +189,22 @@
             :class="['seal-image', { 'seal-stamped': center.isAcquired }]" 
             :style="center.isAcquired ? { filter: `drop-shadow(0 2px 5px ${themeStore.currentTheme.sealShadow})` } : {}"
           />
-          <div v-if="!center.isAcquired" class="lock-overlay" :style="themeStore.isDark ? { background: '#262626', borderColor: '#404040' } : {}">
-            <van-icon name="lock" size="13" :color="themeStore.isDark ? '#737373' : '#aaa'" />
+          <div v-if="!center.isAcquired" class="lock-overlay">
+            <van-icon name="lock" size="13" />
           </div>
         </div>
 
         <!-- 텍스트 정보 (확대된 폰트 사이즈 적용) -->
         <div class="slot-info">
-          <div class="center-name" :style="themeStore.isDark ? { color: '#e2e8f0' } : {}">{{ center.name }}</div>
+          <div class="center-name text-truncate">{{ center.name }}</div>
           <div 
             v-if="center.isAcquired" 
-            class="acquired-time"
+            class="acquired-time tabular-nums"
             :style="{ color: themeStore.currentTheme.main }"
           >
             {{ formatDate(center.acquiredAt) }}
           </div>
-          <div v-else class="unacquired-label" :style="themeStore.isDark ? { color: '#71717a' } : {}">
+          <div v-else class="unacquired-label">
             미방문
           </div>
         </div>
@@ -240,22 +230,22 @@
           <p v-if="selectedCenter.address"><strong>주소:</strong> {{ selectedCenter.address }}</p>
           <p>
             <strong>인증 상태:</strong> 
-            <span :style="{ color: selectedCenter.isAcquired ? themeStore.currentTheme.main : '#999', fontWeight: 'bold' }">
-              {{ selectedCenter.isAcquired ? `인증 완료 (x${selectedCenter.visitCount || 1})` : '미방문 🔒' }}
+            <span class="tabular-nums" :style="{ color: selectedCenter.isAcquired ? themeStore.currentTheme.main : 'var(--text-sub, #999)', fontWeight: 'bold' }">
+              {{ selectedCenter.isAcquired ? `인증 완료 (x${selectedCenter.visitCount || 1})` : '미방문' }}
             </span>
           </p>
 
           <!-- 방문 이력 타임라인 (1회 달성 시에도 표시) -->
           <div v-if="selectedCenter.isAcquired" class="history-box">
-            <div class="history-title"><strong>방문 이력 (총 {{ selectedCenter.visitCount || 1 }}회)</strong></div>
+            <div class="history-title"><strong>방문 이력 <span class="tabular-nums">(총 {{ selectedCenter.visitCount || 1 }}회)</span></strong></div>
             <div class="history-list">
               <div 
                 v-for="(h, idx) in (selectedCenter.history && selectedCenter.history.length > 0 ? selectedCenter.history : [{ round: 1, acquiredAt: selectedCenter.acquiredAt }])" 
                 :key="idx" 
                 class="history-item"
               >
-                <span class="badge-mini" :style="{ backgroundColor: themeStore.currentTheme.main }">x{{ h.round || idx + 1 }}</span>
-                <span class="history-date">{{ formatDate(h.acquiredAt) }}</span>
+                <span class="badge-mini tabular-nums" :style="{ backgroundColor: themeStore.currentTheme.main }">x{{ h.round || idx + 1 }}</span>
+                <span class="history-date tabular-nums">{{ formatDate(h.acquiredAt) }}</span>
               </div>
             </div>
           </div>
@@ -511,9 +501,6 @@ const goToMap = () => {
   font-size: 13.5px;
   font-weight: 700;
   color: var(--text-main, #1e293b);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .course-complete-badge {
@@ -656,7 +643,7 @@ const goToMap = () => {
 }
 
 .course-chip {
-  background: var(--app-bg, #f8fafc);
+  background: var(--card-bg, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 8px;
   padding: 7px 9px;
@@ -680,9 +667,6 @@ const goToMap = () => {
   font-size: 11px;
   font-weight: 700;
   color: var(--text-main, #1e293b);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: 90px;
 }
 
@@ -691,8 +675,12 @@ const goToMap = () => {
   font-weight: 800;
 }
 
-.chip-trophy {
-  font-size: 11px;
+.chip-complete-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.12);
 }
 
 .chip-bar {
@@ -738,6 +726,7 @@ const goToMap = () => {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  background-color: var(--card-bg, #ffffff);
   border: 1px dashed var(--border-color, #e2e8f0);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
   min-height: 132px;
@@ -774,14 +763,15 @@ const goToMap = () => {
   position: absolute;
   bottom: 0;
   right: 0;
-  background: #f1f5f9;
+  background: var(--app-bg, #f1f5f9);
+  color: var(--text-sub, #94a3b8);
   border-radius: 50%;
   width: 20px;
   height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color, #cbd5e1);
 }
 
 .slot-info {
@@ -797,9 +787,6 @@ const goToMap = () => {
   font-size: 12px;
   font-weight: 700;
   color: var(--text-main, #1e293b);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   width: 100%;
   max-width: 100%;
   display: block;

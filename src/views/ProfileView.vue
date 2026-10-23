@@ -15,8 +15,8 @@
           @click="copyUserCode"
         >
           <span class="user-code-label">친구 코드:</span>
-          <span class="user-code-val">{{ currentUserCode }}</span>
-          <span class="copy-icon">📋</span>
+          <span class="user-code-val tabular-nums">{{ currentUserCode }}</span>
+          <span class="copy-action-text">복사</span>
         </div>
       </div>
 
@@ -46,6 +46,36 @@
         <van-cell title="앱 버전" value="1.0.0 (PWA)" />
       </van-cell-group>
 
+      <!-- 1-2. 라이딩 업적 & 챌린지 -->
+      <van-cell-group inset title="종주 뱃지 (17개)" class="achievement-cell-group">
+        <van-cell
+          title="종주 뱃지 목록"
+          is-link
+          @click="showAchievementDrawer = true"
+        >
+          <template #value>
+            <span class="achievement-rate tabular-nums">
+              {{ achievementSummary.unlockedCount }} / {{ achievementSummary.totalCount }} ({{ achievementSummary.percentage }}%)
+            </span>
+          </template>
+        </van-cell>
+
+        <!-- 최근 획득 뱃지 프리뷰 칩 목록 (최대 3개) -->
+        <div v-if="achievementSummary.unlockedCount > 0" class="achievement-preview-row no-scrollbar" @click="showAchievementDrawer = true">
+          <div 
+            v-for="ach in previewUnlockedAchievements" 
+            :key="ach.id" 
+            :class="['achievement-mini-chip', ach.tier]"
+          >
+            <span class="mini-tier-dot"></span>
+            <span class="mini-chip-title">{{ ach.title }}</span>
+          </div>
+        </div>
+        <div v-else class="achievement-empty-hint" @click="showAchievementDrawer = true">
+          전국 13개 자전거길 종주에 도전하고 완주 뱃지를 수집해보세요.
+        </div>
+      </van-cell-group>
+
       <!-- 2. 화면 및 도장 테마 설정 -->
       <van-cell-group inset title="화면 및 도장 테마 설정" class="theme-setting-group">
         <!-- 1) 지도 배경 테마 -->
@@ -62,7 +92,7 @@
               :class="['bg-theme-btn', { active: themeStore.bgThemeKey === bg.key }]"
               @click="themeStore.setBgTheme(bg.key)"
             >
-              <span class="bg-mode-icon">{{ bg.isDark ? '🌙' : '☀️' }}</span>
+              <span class="bg-mode-dot" :class="{ 'is-dark': bg.isDark }"></span>
               <span class="bg-name">{{ bg.name }}</span>
             </button>
           </div>
@@ -132,29 +162,43 @@
 
       <!-- 친구 관리 모달 팝업 -->
       <FriendModal v-model:show="showFriendModal" />
+
+      <!-- 라이딩 업적 서랍 팝업 -->
+      <AchievementDrawer v-model:show="showAchievementDrawer" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 import { auth, googleProvider } from '../services/firebase'
 import { useStampManager } from '../composables/useStampManager'
 import { useGpxManager } from '../composables/useGpxManager'
 import { useFriendManager } from '../composables/useFriendManager'
+import { useAchievementManager } from '../composables/useAchievementManager'
 import FriendModal from '../components/FriendModal.vue'
+import AchievementDrawer from '../components/AchievementDrawer.vue'
 import { showSuccessToast, showFailToast } from 'vant'
 
 const user = ref(null)
 const isLoading = ref(false)
 const showFriendModal = ref(false)
+const showAchievementDrawer = ref(false)
 
 const stampManager = useStampManager()
-const { themeStore, acquiredCount, totalCount, totalVisitCount, progressRate } = stampManager
+const { themeStore, acquiredCount, totalCount, totalVisitCount, progressRate, acquiredStamps } = stampManager
 
 const gpxManager = useGpxManager()
-const { totalTracksCount, totalDistanceKm } = gpxManager
+const { totalTracksCount, totalDistanceKm, tracks } = gpxManager
+
+const achievementManager = useAchievementManager()
+const { summary: achievementSummary, unlockedAchievements, checkAchievements } = achievementManager
+
+// 최근 획득 뱃지 최대 3개 미리보기
+const previewUnlockedAchievements = computed(() => {
+  return unlockedAchievements.value.slice(0, 3)
+})
 
 const friendManager = useFriendManager()
 const {
@@ -166,6 +210,13 @@ const {
   startListening,
   stopListening
 } = friendManager
+
+// 스탬프 또는 GPX 트랙 변경 시 업적 즉시 재평가
+watch([() => tracks?.value, () => acquiredStamps?.value], ([tr, st]) => {
+  const safeTracks = Array.isArray(tr) ? tr : []
+  const safeStamps = Array.isArray(st) ? st : ((stampManager.stampStore?.acquiredStamps) || [])
+  checkAchievements(safeTracks, safeStamps)
+}, { deep: true, immediate: true })
 
 // 로그인 상태 감지 및 친구 리스너 연동
 onMounted(() => {
@@ -224,7 +275,7 @@ const handleLogout = async () => {
   box-sizing: border-box;
   background-color: var(--app-bg, #f7f8fa);
   transition: background-color 0.3s ease;
-  padding-bottom: 30px;
+  padding-bottom: 70px;
 }
 
 .profile-content {
@@ -299,9 +350,25 @@ const handleLogout = async () => {
   color: #ffffff;
 }
 
-.copy-icon {
-  font-size: 12px;
-  opacity: 0.7;
+.copy-action-text {
+  font-size: var(--font-2xs, 10px);
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-xs, 4px);
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--text-sub, #64748b);
+  letter-spacing: -0.2px;
+}
+
+.user-code-chip.is-dark .copy-action-text {
+  background: rgba(255, 255, 255, 0.12);
+  color: #d4d4d8;
+}
+
+:deep(.van-cell__value) {
+  font-variant-numeric: tabular-nums;
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
 }
 
 .friend-cell-value {
@@ -352,7 +419,7 @@ const handleLogout = async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   padding: 8px 4px;
   border-radius: 10px;
   border: 1px solid var(--border-color, #e2e8f0);
@@ -375,8 +442,22 @@ const handleLogout = async () => {
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
 }
 
-.bg-mode-icon {
-  font-size: 14px;
+.bg-mode-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.2);
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.bg-mode-dot.is-dark {
+  background: #18181b;
+  border-color: #71717a;
+}
+
+.bg-theme-btn.active .bg-mode-dot {
+  border-color: #ffffff;
 }
 
 /* 도장 테마 그리드 (2열 2행) */
@@ -421,5 +502,63 @@ const handleLogout = async () => {
   font-size: 11.5px;
   margin-top: 8px;
   line-height: 1.4;
+}
+
+/* 라이딩 업적 섹션 스타일 */
+.achievement-cell-group {
+  margin-top: 14px;
+}
+
+.achievement-rate {
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+}
+
+.achievement-preview-row {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 14px;
+  overflow-x: auto;
+  cursor: pointer;
+}
+
+.achievement-mini-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background-color: var(--app-bg, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.achievement-mini-chip .mini-tier-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.achievement-mini-chip.bronze .mini-tier-dot { background-color: #cd7f32; }
+.achievement-mini-chip.silver .mini-tier-dot { background-color: #94a3b8; }
+.achievement-mini-chip.gold .mini-tier-dot { background-color: #eab308; }
+.achievement-mini-chip.platinum .mini-tier-dot { background-color: #38bdf8; }
+
+.achievement-mini-chip.bronze { border-color: rgba(205, 127, 50, 0.3); }
+.achievement-mini-chip.silver { border-color: rgba(148, 163, 184, 0.3); }
+.achievement-mini-chip.gold { border-color: rgba(234, 179, 8, 0.3); }
+.achievement-mini-chip.platinum { border-color: rgba(56, 189, 248, 0.3); }
+
+.mini-chip-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-main, #334155);
+}
+
+.achievement-empty-hint {
+  padding: 6px 16px 12px;
+  font-size: 12px;
+  color: var(--text-sub, #94a3b8);
+  cursor: pointer;
 }
 </style>

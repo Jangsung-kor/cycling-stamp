@@ -23,6 +23,16 @@
   -webkit-user-select: none;
 }
 
+/* 스크롤바 숨김 (가로 탭 필터 바 등) */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* 정갈한 소제목 라벨 (아이콘 배제) */
 .section-caption {
   font-size: var(--font-xs);

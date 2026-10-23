@@ -6,24 +6,24 @@
     round
     closeable
     :style="{ height: '85%', maxHeight: '720px' }"
-    :class="['friend-modal-popup', { 'is-dark': themeStore.isDark }]"
+    class="friend-modal-popup cycling-modal-popup"
   >
-    <div :class="['friend-modal', { 'is-dark': themeStore.isDark }]">
+    <div class="friend-modal cycling-modal-container">
       <!-- 헤더 -->
-      <div class="modal-header">
-        <h3 class="modal-title">👥 라이딩 친구 관리</h3>
-        <p class="modal-subtitle">친구와 주행 경로(GPX)를 공유하고 함께 지도를 색칠하세요.</p>
+      <div class="modal-header cycling-modal-header">
+        <h3 class="modal-title cycling-modal-title">라이딩 친구 관리</h3>
+        <p class="modal-subtitle cycling-modal-subtitle">친구와 주행 경로(GPX)를 공유하고 함께 지도를 색칠하세요.</p>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body cycling-modal-body">
         <!-- 1. 내 친구 코드 카드 -->
         <div class="my-code-card">
           <div class="my-code-info">
             <span class="my-code-label">내 친구 코드</span>
-            <span class="my-code-val">{{ currentUserCode || '발급 대기' }}</span>
+            <span class="my-code-val tabular-nums">{{ currentUserCode || '발급 대기' }}</span>
           </div>
-          <button type="button" class="copy-btn" @click="copyUserCode">
-            <span>📋</span> 복사
+          <button type="button" class="copy-btn cycling-btn-subtle" @click="copyUserCode">
+            복사
           </button>
         </div>
 
@@ -69,8 +69,8 @@
               <div class="user-tag">{{ searchedUser.userCode }}</div>
             </div>
             <div class="user-action-col">
-              <span v-if="isFriend(searchedUser.uid)" class="status-badge friend">친구</span>
-              <span v-else-if="hasSentRequestTo(searchedUser.uid)" class="status-badge requested">신청됨</span>
+              <span v-if="isFriend(searchedUser.uid)" class="status-badge cycling-badge friend">친구</span>
+              <span v-else-if="hasSentRequestTo(searchedUser.uid)" class="status-badge cycling-badge">신청됨</span>
               <button
                 v-else-if="isFriendLimitReached"
                 type="button"
@@ -128,7 +128,7 @@
                 </button>
                 <button
                   type="button"
-                  class="action-btn reject"
+                  class="action-btn reject cycling-btn-subtle"
                   @click="rejectRequest(req.senderUid)"
                 >
                   거절
@@ -142,7 +142,7 @@
         <div class="section-card">
           <div class="section-title">
             <span>내 친구 목록</span>
-            <span class="sub-count">({{ friendCount }}/{{ maxFriendsLimit }}명)</span>
+            <span class="sub-count tabular-nums">({{ friendCount }}/{{ maxFriendsLimit }}명)</span>
           </div>
 
           <div v-if="friendCount > 0" class="friend-list">
@@ -160,14 +160,14 @@
               <div class="friend-meta">
                 <div class="friend-name">{{ friend.displayName }}</div>
                 <div class="friend-sub">
-                  <span class="friend-code">{{ friend.userCode }}</span>
-                  <span v-if="friend.since" class="friend-since">· {{ formatFriendSince(friend.since) }}</span>
+                  <span class="friend-code tabular-nums">{{ friend.userCode }}</span>
+                  <span v-if="friend.since" class="friend-since tabular-nums">· {{ formatFriendSince(friend.since) }}</span>
                 </div>
               </div>
               <div class="friend-actions">
                 <button
                   type="button"
-                  class="action-btn unfriend"
+                  class="action-btn unfriend cycling-btn-subtle"
                   @click="unfriend(friend)"
                 >
                   끊기
@@ -177,9 +177,8 @@
           </div>
 
           <!-- 친구 목록 비었을 때 -->
-          <div v-else class="empty-friends">
-            <div class="empty-icon">🚴💨</div>
-            <p class="empty-text">아직 함께 달리는 친구가 없습니다.<br/>친구 코드를 검색하여 라이딩 메이트를 맺어보세요!</p>
+          <div v-else class="empty-friends cycling-empty-state">
+            <p class="empty-text cycling-empty-desc">아직 등록된 친구가 없습니다.<br/>친구 코드를 검색하여 라이딩 메이트를 맺어보세요.</p>
           </div>
         </div>
       </div>
@@ -255,35 +254,8 @@ const handleSendRequest = async () => {
 </script>
 
 <style scoped>
-.friend-modal-popup {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  background-color: var(--app-bg, #f8fafc);
-}
-
-.friend-modal {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  box-sizing: border-box;
-}
-
 .modal-header {
   padding: 20px 20px 12px;
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
-}
-
-.modal-title {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text-main, #0f172a);
-}
-
-.modal-subtitle {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: var(--text-sub, #64748b);
 }
 
 .modal-body {
@@ -301,7 +273,7 @@ const handleSendRequest = async () => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #ffffff;
+  background: var(--card-bg, #ffffff);
   border-radius: 12px;
   border: 1px solid var(--border-color, #e2e8f0);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -331,24 +303,11 @@ const handleSendRequest = async () => {
   align-items: center;
   gap: 4px;
   padding: 6px 12px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #334155;
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.copy-btn:active {
-  background: #e2e8f0;
-  transform: scale(0.97);
 }
 
 /* 공통 섹션 카드 */
 .section-card {
-  background: #ffffff;
+  background: var(--card-bg, #ffffff);
   border-radius: 14px;
   padding: 14px 16px;
   border: 1px solid var(--border-color, #e2e8f0);
@@ -372,7 +331,7 @@ const handleSendRequest = async () => {
 }
 
 .badge-count {
-  background: #ef4444;
+  background: var(--color-danger, #ef4444);
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
@@ -389,7 +348,9 @@ const handleSendRequest = async () => {
 .code-input {
   flex: 1;
   padding: 9px 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color, #cbd5e1);
+  background-color: var(--card-bg, #ffffff);
+  color: var(--text-main, #0f172a);
   border-radius: 8px;
   font-size: 13px;
   outline: none;
@@ -422,8 +383,8 @@ const handleSendRequest = async () => {
   display: flex;
   align-items: center;
   padding: 10px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--app-bg, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 10px;
   gap: 10px;
 }
@@ -437,30 +398,13 @@ const handleSendRequest = async () => {
 .user-name {
   font-size: 13.5px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-main, #0f172a);
 }
 
 .user-tag {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-sub, #64748b);
   font-weight: 500;
-}
-
-.status-badge {
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
-}
-
-.status-badge.friend {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.status-badge.requested {
-  background: #f1f5f9;
-  color: #64748b;
 }
 
 /* 공통 액션 버튼 */
@@ -483,13 +427,11 @@ const handleSendRequest = async () => {
 }
 
 .action-btn.reject {
-  background: #f1f5f9;
-  color: #64748b;
+  color: var(--text-sub, #64748b);
 }
 
 .action-btn.unfriend {
-  background: #fff1f2;
-  color: #e11d48;
+  color: var(--color-danger, #e11d48);
 }
 
 .action-btn:active {
@@ -498,8 +440,8 @@ const handleSendRequest = async () => {
 
 .action-btn.disabled,
 .action-btn:disabled {
-  background: #cbd5e1 !important;
-  color: #64748b !important;
+  background: var(--border-color, #cbd5e1) !important;
+  color: var(--text-sub, #64748b) !important;
   cursor: not-allowed;
   opacity: 0.8;
   transform: none !important;
@@ -508,11 +450,11 @@ const handleSendRequest = async () => {
 .limit-warning-banner {
   margin-top: 10px;
   padding: 8px 12px;
-  background: #fef2f2;
-  border: 1px solid #fee2e2;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: 8px;
   font-size: 11.5px;
-  color: #b91c1c;
+  color: #ef4444;
   line-height: 1.4;
   font-weight: 500;
 }
@@ -529,8 +471,8 @@ const handleSendRequest = async () => {
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  background: #fef2f2;
-  border: 1px solid #fee2e2;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: 10px;
 }
 
@@ -543,12 +485,12 @@ const handleSendRequest = async () => {
 .request-name {
   font-size: 13px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-main, #1e293b);
 }
 
 .request-code {
   font-size: 11px;
-  color: #ef4444;
+  color: var(--color-danger, #ef4444);
   font-weight: 600;
 }
 
@@ -569,8 +511,8 @@ const handleSendRequest = async () => {
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--app-bg, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 10px;
 }
 
@@ -583,139 +525,19 @@ const handleSendRequest = async () => {
 .friend-name {
   font-size: 13.5px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-main, #0f172a);
 }
 
 .friend-sub {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-sub, #64748b);
   display: flex;
   gap: 4px;
   align-items: center;
 }
 
+/* 빈 상태는 공통 .cycling-empty-state / desc 활용 */
 .empty-friends {
-  text-align: center;
   padding: 24px 12px;
-}
-
-.empty-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
-.empty-text {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #94a3b8;
-}
-
-/* 다크 테마 지원 */
-.friend-modal-popup.is-dark {
-  background-color: #18181b;
-}
-
-.friend-modal.is-dark .modal-header {
-  border-bottom-color: #27272a;
-}
-
-.friend-modal.is-dark .modal-title {
-  color: #f4f4f5;
-}
-
-.friend-modal.is-dark .modal-subtitle {
-  color: #a1a1aa;
-}
-
-.friend-modal.is-dark .my-code-card {
-  background-color: #27272a;
-  border-color: #3f3f46;
-}
-
-.friend-modal.is-dark .my-code-label {
-  color: #a1a1aa;
-}
-
-.friend-modal.is-dark .my-code-val {
-  color: #ffffff;
-}
-
-.friend-modal.is-dark .copy-btn {
-  background-color: #3f3f46;
-  border-color: #52525b;
-  color: #f4f4f5;
-}
-
-.friend-modal.is-dark .section-card {
-  background-color: #27272a;
-  border-color: #3f3f46;
-}
-
-.friend-modal.is-dark .section-title {
-  color: #f4f4f5;
-}
-
-.friend-modal.is-dark .code-input {
-  background-color: #18181b;
-  border-color: #3f3f46;
-  color: #f4f4f5;
-}
-
-.friend-modal.is-dark .search-result-card {
-  background-color: #18181b;
-  border-color: #3f3f46;
-}
-
-.friend-modal.is-dark .user-name {
-  color: #f4f4f5;
-}
-
-.friend-modal.is-dark .user-tag {
-  color: #a1a1aa;
-}
-
-.friend-modal.is-dark .friend-item {
-  background-color: #18181b;
-  border-color: #3f3f46;
-}
-
-.friend-modal.is-dark .friend-name {
-  color: #f4f4f5;
-}
-
-.friend-modal.is-dark .friend-sub {
-  color: #a1a1aa;
-}
-
-.friend-modal.is-dark .status-badge.requested {
-  background-color: #27272a;
-  color: #a1a1aa;
-}
-
-.friend-modal.is-dark .action-btn.reject {
-  background-color: #3f3f46;
-  color: #d4d4d8;
-}
-
-.friend-modal.is-dark .request-item {
-  background-color: #3f1d1d;
-  border-color: #7f1d1d;
-}
-
-.friend-modal.is-dark .request-name {
-  color: #fecaca;
-}
-
-.friend-modal.is-dark .limit-warning-banner {
-  background-color: #450a0a;
-  border-color: #7f1d1d;
-  color: #fca5a5;
-}
-
-.friend-modal.is-dark .action-btn.disabled,
-.friend-modal.is-dark .action-btn:disabled {
-  background-color: #3f3f46 !important;
-  color: #71717a !important;
 }
 </style>

@@ -260,24 +260,77 @@
           - 4개 핵심 시나리오(신규/원격 `isSynced` 식별, 원격 삭제 감지 및 로컬 자동 정리, 오프라인 트랙 보존, 트랙 삭제 시 스토어/IndexedDB/Firestore 톰스톤 기록) 단위 테스트 완비.
           - 총 11개 스위트 75개 테스트 100% 통과 및 프로덕션 빌드(`yarn build`) 검증 완료.
       - **Step 14: 완주 인증 포토 카드 내보내기 & 커뮤니티 바이럴 엔진 구축 완료**:
-        - **100% 브라우저 클라이언트 렌더러 (`src/utils/cardRenderer.js`)**: 인스타그램 스토리(9:16) 및 피드(1:1) 규격 지원, GPX 좌표 종횡비 보존(Mercator) 투영, 미니멀 다크/스탬프 잉크/내 사진 배경 3종 테마 및 아날로그 틸트(-5도) 벡터 도장 합성. Firebase Storage 0원(서버 미전송, 인메모리 Blob 처리).
+        - **100% 브라우저 클라이언트 렌더러 (`src/utils/cardRenderer.js`)**: 인스타그램 스토리(9:16) 및 피드(1:1) 규격 지원, GPX 좌표 종횡비 보존(Mercator) 투영, 야간 라이딩/아날로그 수첩/내 사진 배경 3종 테마 및 아날로그 틸트(-5도) 벡터 도장 합성. Firebase Storage 0원(서버 미전송, 인메모리 Blob 처리).
         - **도메인 파사드 (`src/composables/useShareCard.js`)**: Web Share API(`navigator.share`) 1-Tap 인스타그램/카카오톡 공유 및 PNG 다운로드 자동 폴백 연동.
         - **모던 미니멀 UI 모달 (`src/components/ShareCardModal.vue`)**: 라이브 프리뷰, 비율/테마 선택, 공통 스타일 토큰 적용, 아이콘 남발 배제.
         - **모바일 갤러리 피커 연동 개선**: 구체적 이미지 MIME/확장자(`image/jpeg,image/png,...`)를 지정하여 모바일에서 카메라/앨범 통합 선택이 원활하도록 개선 및 중복 카메라 버튼 정돈.
         - **사용자 진입점 연동**: `App.vue`(글로벌 모달), `GpxDrawer.vue`(내 주행 및 친구 주행 트랙 카드 `[인증 카드]`), `StampView.vue`(코스 완주 영역 및 개별 도장 팝업 `[인증 카드 내보내기]`).
         - **테스트 및 검증 (`tests/test_share_card.js`)**: 11개 단위 테스트 완비, 총 12개 스위트 82개 자동화 테스트 100% 통과 및 프로덕션 빌드(`yarn build`) 완료.
 
-*   **다음 세션 예정 작업 (Next Planned Step)**:
-    - **[Step 15] 전 화면 공통 디자인 시스템 전면 일원화 & 상용 수준 비주얼 마감**:
-      - Step 15-1: 스탬프 수첩 뷰(`StampView.vue`) 인라인/커스텀 CSS 전면 제거 및 `src/styles/` 토큰 일원화
-      - Step 15-2: 마이페이지(`ProfileView.vue`) 및 친구 관리 모달(`FriendModal.vue`) 공통 스타일 교체
-      - Step 15-3: 5개 배경 테마 × 4개 스탬프 테마 전역 명도 대비 및 모바일 뷰포트 마감 검증
+      - **Step 15: 전 화면 공통 디자인 시스템 전면 일원화 & 상용 수준 비주얼 마감 완료**:
+        - **스탬프 수첩 뷰 (`StampView.vue`)**: 인라인 테마/다크 하드코딩 스타일 전면 제거, `var(--card-bg)`, `var(--border-color)`, `var(--app-bg)` 일원화, 완주/현황 뱃지 내 장식용 이모지(`🏆`, `📍`, `🔒` 등) 정리, 수치 표시 영역 `.tabular-nums` 전면 적용.
+        - **마이페이지 (`ProfileView.vue`)**: 친구 코드 복사 버튼 텍스트 정돈, 배경 테마 선택 바 내 장식용 이모지(`🌙`, `☀️`) 대신 미니멀 인디케이터 도트(`.bg-mode-dot`) 적용, 달성 통계 셀 `.tabular-nums` 적용.
+        - **친구 관리 모달 (`FriendModal.vue`)**: 모달 타이틀 및 복사 버튼 내 장식용 이모지(`👥`, `📋`, `🚴💨`) 배제, 카드/목록/입력창 공통 디자인 시스템 토큰 적용.
+        - **인증 포토 카드 [아날로그 수첩] & [심플] 테마 고도화 (`src/utils/cardRenderer.js`, `src/components/ShareCardModal.vue`)**:
+          - **아날로그 수첩**: 웜톤 비네팅 및 여권 모눈 격자 질감, 클래식 이중 프레임 및 앤틱 코너 브래킷, 배경 공식 인증 원형 씰 워터마크 날인, 2-pass 인주 잉크 번짐 궤적 효과, 종이 라벨 통계 박스 적용으로 '실물 국토종주 수첩' 감성 차별화 확립.
+          - **심플 테마 (서브 컬러: 블랙 / 네이비)**: 기존 '미니멀 다크/야간 라이딩'에서 '심플'로 상위 명칭 개편. 하위 서브 선택지로 `[블랙]`(Slate Deep Dark + Skyblue 궤적)과 `[네이비]`(Midnight Navy + Soft Blue 궤적) 2단계 선택 체계 구축. 불투명하고 답답한 통계 박스를 걷어내고 1px 슬림 헤어라인 프레임과 미니멀 타이포그래피 기반의 모던 스위스 디자인 적용.
+        - **전 테마 명도 대비 & 품질 검증**: 5개 배경 테마 × 4개 스탬프 테마 전역에서 폰트 가독성 및 컴포넌트 대비 100% 보장. 총 12개 스위트 85개 자동화 단위/통합 테스트 100% 통과 및 `yarn build` 무결성 검증 완료.
 
-*   **후속 백로그 후보 (Backlog)**:
-    1. **라이더 숙소 꿀팁 메모 및 자전거 실내 보관 태깅**:
-       - 라이더 핵심 관심사인 숙소별 '자전거 객실/실내 보관 가능 여부' 태깅 및 후기/메모 집단지성 DB 구축.
-    2. **친구 라이딩 소셜 피드 & 응원하기 (Social Riding Feed)**:
-       - 맞팔된 친구들의 최근 완주 기록과 인증 카드를 모아보는 피드 타임라인 및 응원 인터랙션.
+      - **Step 16: 라이딩 게이미피케이션 Phase A (전국 탐험률 & 17개 공식 종주 뱃지 시스템) 구축 완료**:
+        - **행정안전부 공인 종주 뱃지 계층 체계 정립 (`src/utils/achievementEngine.js`, `src/composables/useAchievementManager.js`)**:
+          - **확장형 티어 체계 확립**: `브론즈` → `실버` → `골드` → `티타늄` → `그랜드` → `마스터` → `레전드`
+          - **티타늄 (1개)**:
+            - **[국토완주 x2]**: 전국 85개 공식 인증센터 모두 2회차(`visitCount >= 2`) 이상 도장 완료 시 해금 (더블 그랜드슬램).
+          - **골드 (1개)**:
+            - **[국토완주]**: 전국 85개 공식 인증센터 100% 도장 완료 시 해금.
+          - **실버 (2개)**:
+            - **[4대강 종주]**: 한강(서울/남한강), 낙동강, 금강, 영산강 35개 인증센터 완주 시 해금.
+            - **[국토 종주]**: 아라뱃길, 한강(서울), 남한강, 새재, 낙동강 본선 27개 인증센터 완주 시 해금 (안동댐 제외).
+          - **브론즈 (13개 - 간소화 명칭)**:
+            - `[아라뱃길]`, `[한강]`, `[남한강]`, `[북한강]`, `[새재]`, `[낙동강]`, `[금강]`, `[영산강]`, `[섬진강]`, `[오천]`, `[동해안(강원)]`, `[동해안(경북)]`, `[제주]`
+          - 뱃지 종류를 단일 **[종주]** 타이틀(`jongju`)로 통합하고 개별 뱃지 카드에 `[종주]` 식별 칩 연동.
+        - **업적 서랍 UI & 마이페이지 연동 (`ProfileView.vue`, `AchievementDrawer.vue`)**:
+          - 마이페이지 내 `종주 뱃지 (17개)` 섹션 배치, 최근 해금 뱃지 프리뷰 칩, 최상위 티타늄/골드/실버 마일스톤부터 13개 개별 코스까지 원터치 확인 가능한 서랍 UI 제공.
+          - 브론즈, 실버, 골드, 티타늄 4개 티어 카운트 뱃지 필 및 장식용 이모지 배제된 정갈한 타이포그래피 유지.
+        - **영토 탐험률 엔진 (`src/constants/geoRegions.js`, `src/utils/explorationEngine.js`, `useExplorationManager.js`)**:
+          - 전국 250개 시군구 경량 바운딩 박스 기반 공간 매핑, 0.02도 격자 타일 수집으로 전국 탐험률(%) 및 정복 지자체 수치 1ms 이내 초고속 산출.
+        - **카카오맵 기본 모드 vs 탐험 모드 (`KakaoMap.vue`, `useKakaoGpxLayer.js`, `ConqueredRegionsModal.vue`)**:
+          - 상단 중앙 플로팅 세그먼트 컨트롤을 통해 기존 맑은 지도를 100% 유지하는 **[기본 모드]**와, 미개척지 안개 마스크(`rgba(15, 23, 42, 0.45)`) 위로 내가 달린 궤적만 32px 네온 웜홀로 환하게 밝혀지는 **[탐험 모드]** 간 원터치 전환 구현.
+          - 기존 '내 주행 기록' 플로팅 버튼과의 겹침 현상 원천 해결 (상단 중앙 안전 영역으로 재배치).
+          - '내 정보' 탭에서 '지도'/'스탬프' 탭 전환 시 발생하던 파사드 바인딩 결함(`useStampManager.acquiredStamps`) 원천 해결.
+        - **단위/통합 테스트 및 빌드 검증 (`tests/test_achievements.js`, `tests/test_exploration.js`)**: 총 14개 스위트 **101개 테스트 100% 통과** 및 프로덕션 번들링(`yarn build`) 753ms 무결성 검증 완료.
+
+      - **Step 17: 종주 뱃지 체계 정돈 & 전 화면 공통 디자인 시스템(Common Style First) 2단계 리팩토링 완료**:
+        - **종주 뱃지 명칭 및 시각 위계 정돈 (`src/utils/achievementEngine.js`, `AchievementDrawer.vue`)**:
+          - 국문 띄어쓰기 규격 통일: `[4대강 종주]`, `[국토 종주]`에 맞추어 골드 **`[국토 완주]`**, 티타늄 **`[국토 완주 x2]`** 띄어쓰기 일원화.
+          - 상단 요약 카드 진행률 게이지 바 제거로 서랍 헤더 높이 16px 축소 및 첫 뱃지 카드 뷰포트 노출 비율 향상.
+          - 뱃지 진행 중 수치(`N%`) 부분만 고대비 티어 색상으로 선명하게 하이라이트하여 WCAG AA 가독성 및 3박자 시각 위계(테두리/배경 스며듦 + 하단 프로그레스 + 숫자 강조) 확립.
+        - **전체 Vue 컴포넌트 커스텀 스타일 전수 조사 및 공통 시스템 승격 (Phase 1 & Phase 2)**:
+          - **Phase 1 (분류 A: 기존 공통 스타일 적용 & 중복 제거)**:
+            - 플로팅 버튼 통일: `MapView.vue`(`.gpx-floating-trigger`) 및 `KakaoMap.vue`(`.supply-toggle-btn`, `.my-location-btn`)을 `.cycling-fab` 기반으로 일원화.
+            - 라벨 칩/뱃지 단일화: `GpxDrawer.vue`(`.stat-chip`) 및 `ConqueredRegionsModal.vue`(`.region-chip`)을 `.cycling-chip`과 `.cycling-badge`로 단일화.
+            - 다크모드 하드코딩 오버라이드 제거: `FriendModal.vue` 내 106줄 규모의 수동 `.is-dark` CSS를 테마 CSS 변수(`var(--card-bg)`, `var(--text-main)` 등)로 일원화하여 전량 삭제.
+            - 말줄임(`.text-truncate`) 및 동적 수치(`.tabular-nums`) 타이포그래피 유틸리티 적용.
+          - **Phase 2 (분류 B: 신규 공통 디자인 시스템 클래스 승격)**:
+            - 모달 표준 레이아웃 승격: `.cycling-modal-popup`, `.cycling-modal-container`, `.cycling-modal-header`, `.cycling-modal-title`, `.cycling-modal-subtitle`, `.cycling-modal-body`
+            - 세그먼트 컨트롤 승격: `.cycling-segment-control`, `.cycling-segment-btn` (`.active`)
+            - 공통 진행률 바 승격: `.cycling-progress-track`, `.cycling-progress-fill`
+            - 빈 상태 UI 승격: `.cycling-empty-state`, `.cycling-empty-title`, `.cycling-empty-desc`
+            - 티어 태그 승격: `.cycling-tier-tag` (`.bronze`, `.silver`, `.gold`, `.titanium`)
+            - 가로 스크롤 숨김 유틸리티: `.no-scrollbar`
+            - 대상 컴포넌트(`AchievementDrawer`, `ConqueredRegionsModal`, `ShareCardModal`, `FriendModal`, `AchievementNotificationModal`, `ProfileView`) 전면 적용 완료.
+        - **품질 지표 및 빌드 검증**:
+          - CSS 번들 크기: `261.01 kB` → **`254.81 kB`** (약 6.2KB 순수 코드 감축).
+          - 단위/통합 테스트: 14개 스위트 **101개 테스트 100% 통과**.
+          - Vite 프로덕션 번들링(`yarn build`) 정상 완료.
+
+*   **다음 세션 예정 작업 (Next Planned Step)**:
+    - **후속 백로그 기능 구현 또는 실서버 배포 (`yarn deploy`)**:
+      1. **라이더 숙소 꿀팁 메모 및 자전거 실내 보관 태깅**:
+         - 라이더 핵심 관심사인 숙소별 '자전거 객실/실내 보관 가능 여부' 태깅 및 후기/메모 집단지성 DB 구축.
+      2. **친구 라이딩 소셜 피드 & 응원하기 (Social Riding Feed)**:
+         - 맞팔된 친구들의 최근 완주 기록과 인증 카드를 모아보는 피드 타임라인 및 응원 인터랙션.
+      3. **사용자 요청 시 Firebase Hosting 실서버 배포 (`yarn deploy`)**.
 
 *   **주의사항**:
     - 기존 퍼사드 패턴(`useStampManager`, `useGpxManager`, `useFriendManager`) 아키텍처 규칙을 엄격히 준수할 것.
